@@ -1,19 +1,21 @@
 package com.project.deporturnos.service;
 
-import com.project.deporturnos.entity.dto.LoginResponseDTO;
+import com.project.deporturnos.entity.dto.*;
 
 import org.springframework.data.domain.Page;
 
 import com.project.deporturnos.entity.domain.Usuario;
-import com.project.deporturnos.entity.dto.LoginMessageDTO;
-import com.project.deporturnos.entity.dto.UsuarioDTO;
 
 public interface IUsuarioService {
 
-    String addUsuario(UsuarioDTO usuarioDTO);
+    RegistrationResponseDTO addUsuario(UsuarioDTO usuarioDTO);
 
-    LoginMessageDTO loginUsuario(LoginResponseDTO loginDTO);
+    LoginMessageDTO loginUsuario(LoginRequestDTO loginDTO);
 
     Page<Usuario> getAllUsuarios();
-    //Page<Usuario> getAllUsuarios(Integer page, Integer size, Boolean enablePagination);
+
+    UsuarioDTO update(Long id, UsuarioRequestUpdateDTO usuarioRequestUpdateDTO);
+
+    void delete(Long id);
+
 }

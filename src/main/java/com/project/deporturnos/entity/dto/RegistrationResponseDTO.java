@@ -1,25 +1,24 @@
 package com.project.deporturnos.entity.dto;
 
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
 @Setter
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UsuarioDTO {
-    @NotNull
+public class RegistrationResponseDTO {
+
+    private Long id;
+
     private String nombre;
-    @NotNull
+
     private String email;
-    @NotNull
-    private String password;
-    @Size(min = 12, max = 14)
+
     private String telefono;
-    @NotNull
-    private String rol;
+
+    private boolean cuentaActivada;
+
 }

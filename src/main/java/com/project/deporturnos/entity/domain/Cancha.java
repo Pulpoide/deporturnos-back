@@ -14,8 +14,7 @@ public class Cancha {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Getters y Setters
-    @Column(nullable = false)
+    @Column
     private String nombre;
 
     @Column(nullable = false)
@@ -25,34 +24,10 @@ public class Cancha {
     private double precioHora;
 
     @Column(nullable = false)
-    private String disponibilidad;
+    private boolean disponibilidad;
 
-    @Column(nullable = false)
+    @Column
     private String descripcion;
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
-    }
-
-    public void setPrecioHora(double precioHora) {
-        this.precioHora = precioHora;
-    }
-
-    public void setDisponibilidad(String disponibilidad) {
-        this.disponibilidad = disponibilidad;
-    }
-
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
 }
 

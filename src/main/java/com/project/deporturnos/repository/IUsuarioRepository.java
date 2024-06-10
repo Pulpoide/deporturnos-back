@@ -10,9 +10,12 @@ import com.project.deporturnos.entity.domain.Usuario;
 
 @EnableJpaRepositories
 @Repository
- public interface IUsuarioRepository extends JpaRepository<Usuario, Integer> {
+ public interface IUsuarioRepository extends JpaRepository<Usuario, Long> {
 
     Optional<Usuario> findOneByEmailAndPassword(String nombre, String password);
 
     Usuario findByEmail(String email);
- }
+
+    boolean existsByEmail(String email);
+
+}
