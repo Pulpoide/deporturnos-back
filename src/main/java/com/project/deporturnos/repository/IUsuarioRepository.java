@@ -1,12 +1,11 @@
 package com.project.deporturnos.repository;
 
-import java.util.Optional;
-
+import com.project.deporturnos.entity.domain.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.stereotype.Repository;
 
-import com.project.deporturnos.entity.domain.Usuario;
+import java.util.Optional;
 
 @EnableJpaRepositories
 @Repository
@@ -14,7 +13,7 @@ import com.project.deporturnos.entity.domain.Usuario;
 
     Optional<Usuario> findOneByEmailAndPassword(String nombre, String password);
 
-    Usuario findByEmail(String email);
+    Optional<Usuario> findByEmail(String email);
 
     boolean existsByEmail(String email);
 

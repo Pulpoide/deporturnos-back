@@ -8,10 +8,6 @@ import com.project.deporturnos.entity.domain.Usuario;
 
 public interface IUsuarioService {
 
-    RegistrationResponseDTO addUsuario(UsuarioDTO usuarioDTO);
-
-    LoginMessageDTO loginUsuario(LoginRequestDTO loginDTO);
-
     Page<Usuario> getAllUsuarios();
 
     UsuarioDTO update(Long id, UsuarioRequestUpdateDTO usuarioRequestUpdateDTO);

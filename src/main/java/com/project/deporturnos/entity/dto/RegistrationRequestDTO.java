@@ -1,6 +1,8 @@
 package com.project.deporturnos.entity.dto;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,14 +13,15 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UsuarioDTO {
+public class RegistrationRequestDTO {
     @NotNull
     private String nombre;
     @NotNull
+    @Email
     private String email;
     @NotNull
+    @Pattern(regexp = "^(?=.*[a-z])(?=.*?[0-9]).{8,}$")
     private String password;
     @Size(min = 12, max = 14)
     private String telefono;
-
 }

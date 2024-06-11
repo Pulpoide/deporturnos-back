@@ -1,14 +1,12 @@
 package com.project.deporturnos.entity.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Setter
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class RegistrationResponseDTO {
 
     private Long id;
@@ -18,7 +16,5 @@ public class RegistrationResponseDTO {
     private String email;
 
     private String telefono;
-
-    private boolean cuentaActivada;
 
 }
