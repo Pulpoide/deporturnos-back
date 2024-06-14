@@ -2,6 +2,7 @@ package com.project.deporturnos.service.implementation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.deporturnos.entity.domain.Cancha;
+import com.project.deporturnos.entity.domain.Deporte;
 import com.project.deporturnos.entity.dto.CanchaRequestDTO;
 import com.project.deporturnos.entity.dto.CanchaRequestUpdateDTO;
 import com.project.deporturnos.entity.dto.CanchaResponseDTO;
@@ -28,7 +29,9 @@ public class CanchaService implements ICanchaService {
     public CanchaResponseDTO save(CanchaRequestDTO canchaRequestDTO){
 
         Cancha cancha = mapper.convertValue(canchaRequestDTO, Cancha.class);
+
         cancha.setDisponibilidad(true);
+        cancha.setDeporte(Deporte.FUTBOL);
 
         Cancha canchaSaved = canchaRepository.save(cancha);
         return mapper.convertValue(canchaSaved, CanchaResponseDTO.class);
@@ -57,7 +60,7 @@ public class CanchaService implements ICanchaService {
         Optional<Cancha> canchaOptional = canchaRepository.findById(id);
 
         if(canchaOptional.isEmpty()){
-            throw new ResourceNotFoundException("No se encontró la cancha con id " + id + ".");
+            throw new ResourceNotFoundException("Cancha no encontrada.");
         }
 
         Cancha cancha = canchaOptional.get();
@@ -70,14 +73,16 @@ public class CanchaService implements ICanchaService {
             cancha.setTipo(canchaRequestUpdateDTO.getTipo());
         }
 
-
-        cancha.setPrecioHora(canchaRequestUpdateDTO.getPrecioHora());
-        cancha.setDisponibilidad(canchaRequestUpdateDTO.isDisponibilidad());
-
-
         if(canchaRequestUpdateDTO.getDescripcion() != null){
             cancha.setDescripcion(canchaRequestUpdateDTO.getDescripcion());
         }
+
+        if(canchaRequestUpdateDTO.getDeporte() != null){
+            cancha.setDeporte(canchaRequestUpdateDTO.getDeporte());
+        }
+
+        cancha.setPrecioHora(canchaRequestUpdateDTO.getPrecioHora());
+        cancha.setDisponibilidad(canchaRequestUpdateDTO.isDisponibilidad());
 
         Cancha canchaUpdated = canchaRepository.save(cancha);
         return mapper.convertValue(canchaUpdated, CanchaResponseDTO.class);
@@ -90,7 +95,7 @@ public class CanchaService implements ICanchaService {
         if(canchaOptional.isPresent()){
             canchaRepository.deleteById(id);
         }else{
-            throw new ResourceNotFoundException("No existe la cancha con el id "+id);
+            throw new ResourceNotFoundException("Cancha no encontrada.");
         }
     }
 

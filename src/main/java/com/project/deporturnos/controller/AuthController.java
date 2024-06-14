@@ -19,14 +19,15 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
+
     // Endpoint para Registrar Usuario
-    @PostMapping(path = "/registrar")
+    @PostMapping( "/register")
     public ResponseEntity<?> saveUsuario(@RequestBody RegistrationRequestDTO registrationRequestDTO) {
         return ResponseEntity.ok(authService.register(registrationRequestDTO));
     }
 
     // Endpoint para Logear Usuario
-    @PostMapping(path="/login")
+    @PostMapping("/login")
     public ResponseEntity<?> loginUsuario(@RequestBody LoginRequestDTO loginDTO) {
         return ResponseEntity.ok(authService.login(loginDTO));
     }

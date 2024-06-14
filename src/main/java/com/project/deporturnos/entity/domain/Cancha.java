@@ -29,5 +29,7 @@ public class Cancha {
     @Column
     private String descripcion;
 
+    @Column
+    private Deporte deporte;
 }
 

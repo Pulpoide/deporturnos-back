@@ -1,29 +1,28 @@
 package com.project.deporturnos.entity.dto;
 
-import com.project.deporturnos.entity.domain.Deporte;
+import com.project.deporturnos.entity.domain.TurnoState;
 import jakarta.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CanchaRequestUpdateDTO {
-    @Nullable
-    private String nombre;
-    @Nullable
-    private String tipo;
+public class TurnoRequestUpdateDTO {
 
-    private double precioHora;
-
-    private boolean disponibilidad;
     @Nullable
-    private String descripcion;
+    private LocalDate fecha;
     @Nullable
-    private Deporte deporte;
+    private LocalTime horaInicio;
+    @Nullable
+    private LocalTime horaFin;
+    @Nullable
+    private TurnoState estado;
 
 }

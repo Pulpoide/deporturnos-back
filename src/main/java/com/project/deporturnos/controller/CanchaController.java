@@ -21,17 +21,18 @@ public class CanchaController {
     @Autowired
     CanchaService canchaService;
 
+
+    // Endpoint para obtener todas las canchas
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')") // nofunca
+    public ResponseEntity<List<CanchaResponseDTO>> getAll() {
+        return ResponseEntity.ok(canchaService.getAll());
+    }
+
     // Endpoint para Registrar Cancha
     @PostMapping
     public ResponseEntity<?> save(@Valid @RequestBody CanchaRequestDTO canchaRequestDTO) {
         return ResponseEntity.ok(canchaService.save(canchaRequestDTO));
-    }
-
-    // Endpoint para obtener todas las canchas
-    @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<CanchaResponseDTO>> findAll() {
-        return ResponseEntity.ok(canchaService.getAll());
     }
 
     // Endpoint para actualizar una cancha
@@ -40,6 +41,7 @@ public class CanchaController {
         return ResponseEntity.ok(canchaService.update(id, canchaRequestUpdateDTO));
     }
 
+    // Endoint para eliminar cancha
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         canchaService.delete(id);

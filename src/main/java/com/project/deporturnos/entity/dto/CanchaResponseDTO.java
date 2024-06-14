@@ -1,5 +1,6 @@
 package com.project.deporturnos.entity.dto;
 
+import com.project.deporturnos.entity.domain.Deporte;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,4 +23,6 @@ public class CanchaResponseDTO {
     private boolean disponibilidad;
 
     private String descripcion;
+
+    private Deporte deporte;
 }
