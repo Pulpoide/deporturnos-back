@@ -1,9 +1,11 @@
 package com.project.deporturnos.service.implementation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.deporturnos.entity.domain.Rol;
 import com.project.deporturnos.entity.domain.Usuario;
-import com.project.deporturnos.entity.dto.UsuarioDTO;
+import com.project.deporturnos.entity.dto.LockUnlockResponseDTO;
 import com.project.deporturnos.entity.dto.UsuarioRequestUpdateDTO;
+import com.project.deporturnos.entity.dto.UsuarioResponseDTO;
 import com.project.deporturnos.exception.ResourceNotFoundException;
 import com.project.deporturnos.repository.IUsuarioRepository;
 import com.project.deporturnos.service.IUsuarioService;
@@ -40,16 +42,16 @@ public class UsuarioService implements IUsuarioService {
         if(usuarioOptional.isPresent()){
             usuarioRepository.deleteById(id);
         }else{
-            throw new ResourceNotFoundException("No existe el usuario con el id "+id);
+            throw new ResourceNotFoundException("Usuario no encontrado.");
         }
     }
 
 
     @Override
-    public UsuarioDTO update(Long id, UsuarioRequestUpdateDTO usuarioRequestUpdateDTO){
+    public UsuarioResponseDTO update(Long id, UsuarioRequestUpdateDTO usuarioRequestUpdateDTO){
         Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
         if(usuarioOptional.isEmpty()){
-            throw new ResourceNotFoundException("No existe el usuario con el id "+id);
+            throw new ResourceNotFoundException("Usuario no encontrado.");
         }
 
         Usuario usuario = usuarioOptional.get();
@@ -71,9 +73,45 @@ public class UsuarioService implements IUsuarioService {
         }
 
         Usuario usuarioGuardado = usuarioRepository.save(usuario);
-        return mapper.convertValue(usuarioGuardado, UsuarioDTO.class);
+        return mapper.convertValue(usuarioGuardado, UsuarioResponseDTO.class);
     }
 
-    
+
+    @Override
+    public UsuarioResponseDTO changeRole(Long id) {
+        Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
+
+        if(usuarioOptional.isEmpty()){
+            throw new ResourceNotFoundException("Usuario no encontrado.");
+        }
+
+        Usuario usuario = usuarioOptional.get();
+
+        if(usuarioOptional.get().getRol().equals(Rol.ADMIN)){
+            usuario.setRol(Rol.CLIENTE);
+        }else{
+            usuario.setRol(Rol.ADMIN);
+        }
+
+        Usuario usuarioSaved = usuarioRepository.save(usuario);
+        return mapper.convertValue(usuarioSaved, UsuarioResponseDTO.class);
+    }
+
+    @Override
+    public LockUnlockResponseDTO lockUnlock(Long id) {
+        Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
+
+        if(usuarioOptional.isEmpty()){
+            throw new ResourceNotFoundException("Usuario no encontrado.");
+        }
+
+        Usuario usuario = usuarioOptional.get();
+
+        usuario.setCuentaActivada(!usuarioOptional.get().isCuentaActivada());
+
+        Usuario usuarioSaved = usuarioRepository.save(usuario);
+        return mapper.convertValue(usuarioSaved, LockUnlockResponseDTO.class);
+    }
+
 
 }

@@ -10,8 +10,11 @@ public interface IUsuarioService {
 
     Page<Usuario> getAllUsuarios();
 
-    UsuarioDTO update(Long id, UsuarioRequestUpdateDTO usuarioRequestUpdateDTO);
+    UsuarioResponseDTO update(Long id, UsuarioRequestUpdateDTO usuarioRequestUpdateDTO);
 
     void delete(Long id);
 
+    UsuarioResponseDTO changeRole(Long id);
+
+    LockUnlockResponseDTO lockUnlock(Long id);
 }
