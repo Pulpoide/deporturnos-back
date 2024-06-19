@@ -1,10 +1,13 @@
 package com.project.deporturnos.service;
 
+import com.project.deporturnos.entity.domain.Reserva;
 import com.project.deporturnos.entity.dto.*;
 
 import org.springframework.data.domain.Page;
 
 import com.project.deporturnos.entity.domain.Usuario;
+
+import java.util.List;
 
 public interface IUsuarioService {
 
@@ -17,4 +20,6 @@ public interface IUsuarioService {
     UsuarioResponseDTO changeRole(Long id);
 
     LockUnlockResponseDTO lockUnlock(Long id);
+
+    List<Reserva> findReservationsByUserId(Long id);
 }

@@ -3,8 +3,13 @@ package com.project.deporturnos.exception;
 import com.project.deporturnos.entity.dto.GeneralResponseDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -38,6 +43,36 @@ public class GlobalExceptionHandler {
     public ResponseEntity<GeneralResponseDTO> handlerTurnoStartTimeAlreadyExist(TurnoStartTimeAlreadyExistException ex)
     {
         return new ResponseEntity<>(new GeneralResponseDTO(ex.getMessage()),HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(TurnoAlreadyReserved.class)
+    public ResponseEntity<GeneralResponseDTO> handlerTurnoAlreadyReserved(TurnoAlreadyReserved ex)
+    {
+        return new ResponseEntity<>(new GeneralResponseDTO(ex.getMessage()),HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseBody
+    public ResponseEntity<String> handleAccessDeniedException() {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied");
+    }
+
+    @ExceptionHandler(InsufficientAuthenticationException.class)
+    @ResponseBody
+    public ResponseEntity<String> handleForbiddenException(Exception ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    @ResponseBody
+    public ResponseEntity<String> handleUnauthorizedException(Exception ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    @ResponseBody
+    public ResponseEntity<String> handleAuthenticationException(Exception ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
     }
 
 

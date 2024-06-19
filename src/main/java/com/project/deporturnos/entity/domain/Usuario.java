@@ -2,6 +2,7 @@ package com.project.deporturnos.entity.domain;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -25,6 +26,7 @@ public class Usuario implements UserDetails {
     @Column(nullable = false)
     private String nombre;
 
+    @Email(message = "Correo electrónico no válido")
     @Column(nullable = false, unique = true)
     private String email;
 
@@ -43,7 +45,7 @@ public class Usuario implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority((this.rol.name())));
+        return List.of(new SimpleGrantedAuthority("ROLE_" + this.rol.name()));
     }
 
     @Override

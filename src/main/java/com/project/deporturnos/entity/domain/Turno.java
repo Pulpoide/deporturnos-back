@@ -27,6 +27,7 @@ public class Turno {
     private LocalTime horaFin;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private TurnoState estado;
 
     @ManyToOne

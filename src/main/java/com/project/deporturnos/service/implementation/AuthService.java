@@ -17,6 +17,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
@@ -47,6 +49,14 @@ public class AuthService {
        if (usuarioOptional.isPresent()) {
            throw new UserAlreadyExistsException("El usuario ya existe.");
        }
+
+       // Validación de email
+        String regex = "^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,}$";
+        java.util.regex.Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(request.getEmail());
+        if (!matcher.matches()) {
+            throw new IllegalArgumentException("Correo electrónico no válido.");
+        }
 
 
         Usuario user = Usuario.builder()

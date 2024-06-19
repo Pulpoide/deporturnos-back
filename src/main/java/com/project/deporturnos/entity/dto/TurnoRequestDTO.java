@@ -16,6 +16,7 @@ import java.time.LocalTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TurnoRequestDTO {
+
     @NotNull(message = "La fecha no puede estar vacía")
     private LocalDate fecha;
     @NotNull(message = "La hora de inicio no puede estar vacía")
