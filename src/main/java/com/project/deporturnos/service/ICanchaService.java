@@ -15,4 +15,6 @@ public interface ICanchaService {
     CanchaResponseDTO update(Long id, CanchaRequestUpdateDTO canchaRequestUpdateDTO);
 
     void delete(Long id);
+
+    List<CanchaResponseDTO> getAllAvailable();
 }

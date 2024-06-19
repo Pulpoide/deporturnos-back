@@ -27,7 +27,7 @@ public class TurnoService implements ITurnoService {
     ITurnoRepository turnoRepository;
 
     @Autowired
-    private ICanchaRepository canchaRepository;
+    ICanchaRepository canchaRepository;
 
     @Autowired
     ObjectMapper mapper;
@@ -41,11 +41,14 @@ public class TurnoService implements ITurnoService {
         Turno turno = mapper.convertValue(turnoRequestDTO, Turno.class);
 
         // Validamos que no exista otro turno con la misma hora de inicio para la cancha
-        List<Turno> turnos = turnoRepository.findByCanchaId(cancha.getId());
-        for(Turno turno1 : turnos){
+        for(Turno turno1 : cancha.getTurnos()){
             if(turno1.getHoraInicio().equals(turnoRequestDTO.getHoraInicio())){
                 throw new TurnoStartTimeAlreadyExistException("Ya existe un turno con esa hora de inicio para esta cancha.");
             }
+        }
+
+        if(turnoRequestDTO.getHoraInicio().equals(turnoRequestDTO.getHoraFin())){
+            throw new IllegalArgumentException("La hora de inicio no puede ser igual a la hora de fin.");
         }
 
         turno.setFecha(turnoRequestDTO.getFecha());
@@ -86,8 +89,7 @@ public class TurnoService implements ITurnoService {
         Turno turno = turnoOptional.get();
 
         // Validamos que no exista otro turno con la misma hora de inicio para la cancha
-        List<Turno> turnos = turnoRepository.findByCanchaId(turno.getCancha().getId());
-        for(Turno turno1 : turnos){
+        for(Turno turno1 : turno.getCancha().getTurnos()){
             if(turno1.getHoraInicio().equals(turnoRequestUpdateDTO.getHoraInicio())){
                 throw new TurnoStartTimeAlreadyExistException("Ya existe un turno con esa hora de inicio para esta cancha.");
             }
@@ -122,6 +124,26 @@ public class TurnoService implements ITurnoService {
         }else{
             throw new ResourceNotFoundException("Turno no encontrado.");
         }
+    }
+
+    @Override
+    public List<TurnoResponseDTO> getAllAvailable() {
+
+        List<Turno> turnos = turnoRepository.findAll();
+
+        if(turnos.isEmpty()){
+            throw new ResourceNotFoundException("No se encontraron turnos para listar.");
+        }
+
+        List<TurnoResponseDTO> turnoAvailableResponseDTOS = new ArrayList<>();
+        for(Turno turno : turnos){
+            if(turno.getEstado().equals(TurnoState.DISPONIBLE)) {
+                turnoAvailableResponseDTOS.add(mapper.convertValue(turno, TurnoResponseDTO.class));
+            }
+        }
+
+
+        return turnoAvailableResponseDTOS;
     }
 
 }

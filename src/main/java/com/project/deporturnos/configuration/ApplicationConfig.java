@@ -1,6 +1,5 @@
 package com.project.deporturnos.configuration;
 
-import com.project.deporturnos.repository.IUsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -10,8 +9,6 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
@@ -19,7 +16,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class ApplicationConfig {
 
     @Autowired
-    private final IUsuarioRepository usuarioRepository;
+    private UserDetailsService service;
+
+    @Autowired
+    private PasswordEncoder encoder;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception
@@ -31,19 +31,9 @@ public class ApplicationConfig {
     public AuthenticationProvider authenticationProvider()
     {
         DaoAuthenticationProvider authenticationProvider= new DaoAuthenticationProvider();
-        authenticationProvider.setUserDetailsService(userDetailService());
-        authenticationProvider.setPasswordEncoder(passwordEncoder());
+        authenticationProvider.setUserDetailsService(service);
+        authenticationProvider.setPasswordEncoder(encoder);
         return authenticationProvider;
     }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public UserDetailsService userDetailService() {
-        return email -> usuarioRepository.findByEmail(email)
-                .orElseThrow(()-> new UsernameNotFoundException("User not found"));
-    }
 }

@@ -1,6 +1,5 @@
 package com.project.deporturnos.entity.dto;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -17,7 +16,6 @@ public class RegistrationRequestDTO {
     @NotNull
     private String nombre;
     @NotNull
-    @Email
     private String email;
     @NotNull
     @Pattern(regexp = "^(?=.*[a-z])(?=.*?[0-9]).{8,}$")

@@ -99,5 +99,24 @@ public class CanchaService implements ICanchaService {
         }
     }
 
+    @Override
+    public List<CanchaResponseDTO> getAllAvailable() {
+
+        List<Cancha> canchas = canchaRepository.findAll();
+
+        if(canchas.isEmpty()){
+            throw new ResourceNotFoundException("No se encontraron canchas para listar.");
+        }
+
+        List<CanchaResponseDTO> canchaAvailableResponseDTOS = new ArrayList<>();
+        for(Cancha cancha : canchas){
+            if(cancha.isDisponibilidad()){
+                canchaAvailableResponseDTOS.add(mapper.convertValue(cancha, CanchaResponseDTO.class));
+            }
+        }
+
+        return canchaAvailableResponseDTOS;
+    }
+
 
 }
