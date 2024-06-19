@@ -40,10 +40,10 @@ public class ReservaService implements IReservaService {
 
         assert reservaRequestDTO.getUsuarioId() != null;
         Usuario usuario = usuarioRepository.findById(reservaRequestDTO.getUsuarioId())
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado."));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
         Turno turno = turnoRepository.findById(reservaRequestDTO.getTurnoId())
-                .orElseThrow(() -> new ResourceNotFoundException("Turno no encontrado."));
+                .orElseThrow(() -> new ResourceNotFoundException("Turno no encontrado"));
 
         Reserva reserva = mapper.convertValue(reservaRequestDTO, Reserva.class);
 
@@ -52,7 +52,7 @@ public class ReservaService implements IReservaService {
         reserva.setTurno(turno);
 
         if(turno.getEstado().equals(TurnoState.RESERVADO)){
-            throw new TurnoAlreadyReserved("Turno no disponible.");
+            throw new TurnoAlreadyReserved("Turno no disponible");
         }
         turno.setEstado(TurnoState.RESERVADO);
 
@@ -65,7 +65,7 @@ public class ReservaService implements IReservaService {
         List<Reserva> reservas = reservaRepository.findAll();
 
         if(reservas.isEmpty()){
-            throw new ResourceNotFoundException("No se encontraron reservas para listar.");
+            throw new ResourceNotFoundException("No se encontraron reservas para listar");
         }
 
         List<ReservaResponseDTO> reservaResponseDTOS = new ArrayList<>();
@@ -81,7 +81,7 @@ public class ReservaService implements IReservaService {
         Optional<Reserva> reservaOptional = reservaRepository.findById(id);
 
         if(reservaOptional.isEmpty()){
-            throw new ResourceNotFoundException("Reserva no encontrada.");
+            throw new ResourceNotFoundException("Reserva no encontrada");
         }
 
         Reserva reserva = reservaOptional.get();
@@ -105,7 +105,7 @@ public class ReservaService implements IReservaService {
             reservaOptional.get().getTurno().setEstado(TurnoState.DISPONIBLE);
             reservaRepository.deleteById(id);
         }else{
-            throw new ResourceNotFoundException("Reserva no encontrada.");
+            throw new ResourceNotFoundException("Reserva no encontrada");
         }
     }
 
@@ -115,10 +115,10 @@ public class ReservaService implements IReservaService {
         Usuario currentUser = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         Turno turno = turnoRepository.findById(reservaRequestDTO.getTurnoId())
-                .orElseThrow(() -> new ResourceNotFoundException("Turno no encontrado."));
+                .orElseThrow(() -> new ResourceNotFoundException("Turno no encontrado"));
 
         if(turno.getEstado().equals(TurnoState.RESERVADO)){
-            throw new TurnoAlreadyReserved("Turno no disponible.");
+            throw new TurnoAlreadyReserved("Turno no disponible");
         }
         turno.setEstado(TurnoState.RESERVADO);
 

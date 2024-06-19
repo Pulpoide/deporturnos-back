@@ -36,19 +36,19 @@ public class TurnoService implements ITurnoService {
 
         //Validamos que la cancha exista para crearle un turno
         Cancha cancha = canchaRepository.findById(turnoRequestDTO.getCanchaId())
-                .orElseThrow(() -> new ResourceNotFoundException("Cancha no encontrada."));
+                .orElseThrow(() -> new ResourceNotFoundException("Cancha no encontrada"));
 
         Turno turno = mapper.convertValue(turnoRequestDTO, Turno.class);
 
         // Validamos que no exista otro turno con la misma hora de inicio para la cancha
         for(Turno turno1 : cancha.getTurnos()){
             if(turno1.getHoraInicio().equals(turnoRequestDTO.getHoraInicio())){
-                throw new TurnoStartTimeAlreadyExistException("Ya existe un turno con esa hora de inicio para esta cancha.");
+                throw new TurnoStartTimeAlreadyExistException("Ya existe un turno con esa hora de inicio para esta cancha");
             }
         }
 
         if(turnoRequestDTO.getHoraInicio().equals(turnoRequestDTO.getHoraFin())){
-            throw new IllegalArgumentException("La hora de inicio no puede ser igual a la hora de fin.");
+            throw new IllegalArgumentException("La hora de inicio no puede ser igual a la hora de fin");
         }
 
         turno.setFecha(turnoRequestDTO.getFecha());
@@ -67,7 +67,7 @@ public class TurnoService implements ITurnoService {
         List<Turno> turnos = turnoRepository.findAll();
 
         if(turnos.isEmpty()){
-            throw new ResourceNotFoundException("No se encontraron turnos para listar.");
+            throw new ResourceNotFoundException("No se encontraron turnos para listar");
         }
 
         List<TurnoResponseDTO> turnoResponseDTOS = new ArrayList<>();
@@ -83,7 +83,7 @@ public class TurnoService implements ITurnoService {
         Optional<Turno> turnoOptional = turnoRepository.findById(id);
 
         if(turnoOptional.isEmpty()){
-            throw new ResourceNotFoundException("Turno no encontrado.");
+            throw new ResourceNotFoundException("Turno no encontrado");
         }
 
         Turno turno = turnoOptional.get();
@@ -91,7 +91,7 @@ public class TurnoService implements ITurnoService {
         // Validamos que no exista otro turno con la misma hora de inicio para la cancha
         for(Turno turno1 : turno.getCancha().getTurnos()){
             if(turno1.getHoraInicio().equals(turnoRequestUpdateDTO.getHoraInicio())){
-                throw new TurnoStartTimeAlreadyExistException("Ya existe un turno con esa hora de inicio para esta cancha.");
+                throw new TurnoStartTimeAlreadyExistException("Ya existe un turno con esa hora de inicio para esta cancha");
             }
         }
 
@@ -122,7 +122,7 @@ public class TurnoService implements ITurnoService {
         if(turnoOptional.isPresent()){
             turnoRepository.deleteById(id);
         }else{
-            throw new ResourceNotFoundException("Turno no encontrado.");
+            throw new ResourceNotFoundException("Turno no encontrado");
         }
     }
 
@@ -132,7 +132,7 @@ public class TurnoService implements ITurnoService {
         List<Turno> turnos = turnoRepository.findAll();
 
         if(turnos.isEmpty()){
-            throw new ResourceNotFoundException("No se encontraron turnos para listar.");
+            throw new ResourceNotFoundException("No se encontraron turnos para listar");
         }
 
         List<TurnoResponseDTO> turnoAvailableResponseDTOS = new ArrayList<>();

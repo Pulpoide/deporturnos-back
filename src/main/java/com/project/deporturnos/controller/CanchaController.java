@@ -45,7 +45,7 @@ public class CanchaController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         canchaService.delete(id);
-        return ResponseEntity.ok(new GeneralResponseDTO("Cancha eliminada correctamente."));
+        return ResponseEntity.ok(new GeneralResponseDTO("Cancha eliminada correctamente"));
     }
 
     // Endpoints para ROLE_CLIENTE o ROLE_ADMIN

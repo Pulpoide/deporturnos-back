@@ -6,6 +6,8 @@ import com.project.deporturnos.entity.dto.LoginRequestDTO;
 import com.project.deporturnos.entity.dto.LoginResponseDTO;
 import com.project.deporturnos.entity.dto.RegistrationRequestDTO;
 import com.project.deporturnos.entity.dto.RegistrationResponseDTO;
+import com.project.deporturnos.exception.InvalidEmailException;
+import com.project.deporturnos.exception.InvalidPasswordException;
 import com.project.deporturnos.exception.ResourceNotFoundException;
 import com.project.deporturnos.exception.UserAlreadyExistsException;
 import com.project.deporturnos.repository.IUsuarioRepository;
@@ -34,7 +36,7 @@ public class AuthService {
         Optional<Usuario> user = userRepository.findByEmail(loginRequestDTO.getEmail());
 
         if(user.isEmpty()) {
-            throw new ResourceNotFoundException("Usuario no encontrado.");
+            throw new ResourceNotFoundException("Usuario no encontrado");
         }
 
         String token = jwtService.getToken(user.get());
@@ -47,7 +49,7 @@ public class AuthService {
     public RegistrationResponseDTO register(RegistrationRequestDTO request) {
         Optional<Usuario> usuarioOptional = userRepository.findByEmail(request.getEmail());
        if (usuarioOptional.isPresent()) {
-           throw new UserAlreadyExistsException("El usuario ya existe.");
+           throw new UserAlreadyExistsException("El usuario ya existe");
        }
 
        // Validación de email
@@ -55,9 +57,16 @@ public class AuthService {
         java.util.regex.Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(request.getEmail());
         if (!matcher.matches()) {
-            throw new IllegalArgumentException("Correo electrónico no válido.");
+            throw new InvalidEmailException("Correo electrónico no válido");
         }
 
+        // Validación de password
+        String regexPass = "^(?=\\w*\\d)(?=\\w*[a-z])\\S{8,16}$";
+        java.util.regex.Pattern patternPass = Pattern.compile(regexPass);
+        Matcher matcherPass = patternPass.matcher(request.getPassword());
+        if (!matcherPass.matches()) {
+            throw new InvalidPasswordException("Contraseña no válida");
+        }
 
         Usuario user = Usuario.builder()
                 .nombre(request.getNombre())
