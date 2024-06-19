@@ -7,6 +7,7 @@ import com.project.deporturnos.entity.domain.Usuario;
 import com.project.deporturnos.entity.dto.LockUnlockResponseDTO;
 import com.project.deporturnos.entity.dto.UsuarioRequestUpdateDTO;
 import com.project.deporturnos.entity.dto.UsuarioResponseDTO;
+import com.project.deporturnos.exception.InvalidEmailException;
 import com.project.deporturnos.exception.ResourceNotFoundException;
 import com.project.deporturnos.exception.UserAlreadyExistsException;
 import com.project.deporturnos.repository.IReservaRepository;
@@ -57,7 +58,7 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
         if(usuarioOptional.isPresent()){
             usuarioRepository.deleteById(id);
         }else{
-            throw new ResourceNotFoundException("Usuario no encontrado.");
+            throw new ResourceNotFoundException("Usuario no encontrado");
         }
     }
 
@@ -66,7 +67,7 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
     public UsuarioResponseDTO update(Long id, UsuarioRequestUpdateDTO usuarioRequestUpdateDTO){
         Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
         if(usuarioOptional.isEmpty()){
-            throw new ResourceNotFoundException("Usuario no encontrado.");
+            throw new ResourceNotFoundException("Usuario no encontrado");
         }
 
         Usuario usuario = usuarioOptional.get();
@@ -84,12 +85,12 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
             java.util.regex.Pattern pattern = Pattern.compile(regex);
             Matcher matcher = pattern.matcher(usuarioRequestUpdateDTO.getEmail());
             if (!matcher.matches()) {
-                throw new IllegalArgumentException("Correo electrónico no válido.");
+                throw new InvalidEmailException("Correo electrónico no válido");
             }
 
             Optional<Usuario> usuarioOptional2 = usuarioRepository.findByEmail(usuarioRequestUpdateDTO.getEmail());
             if(usuarioOptional2.isPresent()){
-                throw new UserAlreadyExistsException("Ya existe un usuario con ese email.");
+                throw new UserAlreadyExistsException("Ya existe un usuario con ese email");
             }
 
             usuario.setEmail(usuarioRequestUpdateDTO.getEmail());
@@ -113,7 +114,7 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
         Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
 
         if(usuarioOptional.isEmpty()){
-            throw new ResourceNotFoundException("Usuario no encontrado.");
+            throw new ResourceNotFoundException("Usuario no encontrado");
         }
 
         Usuario usuario = usuarioOptional.get();
@@ -133,7 +134,7 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
         Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
 
         if(usuarioOptional.isEmpty()){
-            throw new ResourceNotFoundException("Usuario no encontrado.");
+            throw new ResourceNotFoundException("Usuario no encontrado");
         }
 
         Usuario usuario = usuarioOptional.get();

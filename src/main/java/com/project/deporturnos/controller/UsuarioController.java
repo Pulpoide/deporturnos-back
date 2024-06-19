@@ -50,7 +50,7 @@ public class UsuarioController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         usuarioService.delete(id);
-        return ResponseEntity.ok( new GeneralResponseDTO("Usuario eliminado correctamente."));
+        return ResponseEntity.ok( new GeneralResponseDTO("Usuario eliminado correctamente"));
     }
 
     // Endpoint para cambiar el rol de un usuario

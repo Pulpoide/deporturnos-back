@@ -27,6 +27,10 @@ public class GlobalExceptionHandler {
     }
 
 
+
+
+
+
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<GeneralResponseDTO> handlerResourceNotFoundException(ResourceNotFoundException ex)
     {
@@ -50,6 +54,23 @@ public class GlobalExceptionHandler {
     {
         return new ResponseEntity<>(new GeneralResponseDTO(ex.getMessage()),HttpStatus.CONFLICT);
     }
+
+    @ExceptionHandler(InvalidEmailException.class)
+    public ResponseEntity<GeneralResponseDTO> handlerInvalidEmailException(InvalidEmailException ex)
+    {
+        return new ResponseEntity<>(new GeneralResponseDTO(ex.getMessage()),HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(InvalidPasswordException.class)
+    public ResponseEntity<GeneralResponseDTO> handlerInvalidPasswordException(InvalidPasswordException ex)
+    {
+        return new ResponseEntity<>(new GeneralResponseDTO(ex.getMessage()),HttpStatus.BAD_REQUEST);
+    }
+
+
+
+
+
 
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseBody

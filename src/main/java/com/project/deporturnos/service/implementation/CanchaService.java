@@ -43,7 +43,7 @@ public class CanchaService implements ICanchaService {
         List<Cancha> canchas = canchaRepository.findAll();
 
         if(canchas.isEmpty()){
-            throw new ResourceNotFoundException("No se encontraron canchas para listar.");
+            throw new ResourceNotFoundException("No se encontraron canchas para listar");
         }
 
         List<CanchaResponseDTO> canchaResponseDTOS = new ArrayList<>();
@@ -60,7 +60,7 @@ public class CanchaService implements ICanchaService {
         Optional<Cancha> canchaOptional = canchaRepository.findById(id);
 
         if(canchaOptional.isEmpty()){
-            throw new ResourceNotFoundException("Cancha no encontrada.");
+            throw new ResourceNotFoundException("Cancha no encontrada");
         }
 
         Cancha cancha = canchaOptional.get();
@@ -95,7 +95,7 @@ public class CanchaService implements ICanchaService {
         if(canchaOptional.isPresent()){
             canchaRepository.deleteById(id);
         }else{
-            throw new ResourceNotFoundException("Cancha no encontrada.");
+            throw new ResourceNotFoundException("Cancha no encontrada");
         }
     }
 
@@ -105,7 +105,7 @@ public class CanchaService implements ICanchaService {
         List<Cancha> canchas = canchaRepository.findAll();
 
         if(canchas.isEmpty()){
-            throw new ResourceNotFoundException("No se encontraron canchas para listar.");
+            throw new ResourceNotFoundException("No se encontraron canchas para listar");
         }
 
         List<CanchaResponseDTO> canchaAvailableResponseDTOS = new ArrayList<>();
