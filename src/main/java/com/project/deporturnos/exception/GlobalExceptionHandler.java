@@ -49,8 +49,8 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(new GeneralResponseDTO(ex.getMessage()),HttpStatus.CONFLICT);
     }
 
-    @ExceptionHandler(TurnoAlreadyReserved.class)
-    public ResponseEntity<GeneralResponseDTO> handlerTurnoAlreadyReserved(TurnoAlreadyReserved ex)
+    @ExceptionHandler(TurnoAlreadyReservedException.class)
+    public ResponseEntity<GeneralResponseDTO> handlerTurnoAlreadyReserved(TurnoAlreadyReservedException ex)
     {
         return new ResponseEntity<>(new GeneralResponseDTO(ex.getMessage()),HttpStatus.CONFLICT);
     }
@@ -63,6 +63,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(InvalidPasswordException.class)
     public ResponseEntity<GeneralResponseDTO> handlerInvalidPasswordException(InvalidPasswordException ex)
+    {
+        return new ResponseEntity<>(new GeneralResponseDTO(ex.getMessage()),HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ReservaAlreadyCancelledException.class)
+    public ResponseEntity<GeneralResponseDTO> handlerReservaAlreadyCancelledException(ReservaAlreadyCancelledException ex)
     {
         return new ResponseEntity<>(new GeneralResponseDTO(ex.getMessage()),HttpStatus.BAD_REQUEST);
     }

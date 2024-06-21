@@ -8,6 +8,7 @@ import com.project.deporturnos.entity.dto.LockUnlockResponseDTO;
 import com.project.deporturnos.entity.dto.UsuarioRequestUpdateDTO;
 import com.project.deporturnos.entity.dto.UsuarioResponseDTO;
 import com.project.deporturnos.exception.InvalidEmailException;
+import com.project.deporturnos.exception.InvalidPasswordException;
 import com.project.deporturnos.exception.ResourceNotFoundException;
 import com.project.deporturnos.exception.UserAlreadyExistsException;
 import com.project.deporturnos.repository.IReservaRepository;
@@ -65,14 +66,21 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
 
     @Override
     public UsuarioResponseDTO update(Long id, UsuarioRequestUpdateDTO usuarioRequestUpdateDTO){
+
+        Usuario currentUser = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if(currentUser.getRol().equals(Rol.CLIENTE)) {
+            if (!id.equals(currentUser.getId())) {
+                throw new InsufficientAuthenticationException("No autorizado");
+            }
+        }
+
         Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
         if(usuarioOptional.isEmpty()){
             throw new ResourceNotFoundException("Usuario no encontrado");
         }
 
+
         Usuario usuario = usuarioOptional.get();
-
-
 
         if(usuarioRequestUpdateDTO.getNombre() != null){
             usuario.setNombre(usuarioRequestUpdateDTO.getNombre());
@@ -97,6 +105,15 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
         }
 
         if(usuarioRequestUpdateDTO.getPassword() != null){
+
+            // Validación de password
+            String regexPass = "^(?=\\w*\\d)(?=\\w*[a-z])\\S{8,16}$";
+            java.util.regex.Pattern patternPass = Pattern.compile(regexPass);
+            Matcher matcherPass = patternPass.matcher(usuarioRequestUpdateDTO.getPassword());
+            if (!matcherPass.matches()) {
+                throw new InvalidPasswordException("Contraseña no válida");
+            }
+
             usuario.setPassword(passwordEncoder.encode(usuarioRequestUpdateDTO.getPassword()));
         }
 
@@ -151,7 +168,7 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
         Usuario currentUser = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if(currentUser.getRol().equals(Rol.CLIENTE)) {
             if (!Objects.equals(id, currentUser.getId())) {
-                throw new InsufficientAuthenticationException("No autorizado.");
+                throw new InsufficientAuthenticationException("No autorizado");
             }
         }
         return reservaRepository.findByUsuarioId(id);

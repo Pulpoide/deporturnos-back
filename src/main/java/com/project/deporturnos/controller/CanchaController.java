@@ -36,14 +36,14 @@ public class CanchaController {
     // Endpoint para actualizar una cancha
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<CanchaResponseDTO> update(@PathVariable Long id, @Valid @RequestBody CanchaRequestUpdateDTO canchaRequestUpdateDTO) {
+    public ResponseEntity<CanchaResponseDTO> update(@PathVariable("id") Long id, @Valid @RequestBody CanchaRequestUpdateDTO canchaRequestUpdateDTO) {
         return ResponseEntity.ok(canchaService.update(id, canchaRequestUpdateDTO));
     }
 
     // Endoint para eliminar cancha
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
+    public ResponseEntity<?> delete(@PathVariable("id") Long id) {
         canchaService.delete(id);
         return ResponseEntity.ok(new GeneralResponseDTO("Cancha eliminada correctamente"));
     }
