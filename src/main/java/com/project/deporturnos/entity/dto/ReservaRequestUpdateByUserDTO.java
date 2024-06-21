@@ -6,13 +6,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Setter
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class LoginRequestDTO {
-    @NotNull
-    private String email;
-    @NotNull
-    private String password;
+public class ReservaRequestUpdateByUserDTO {
+    @NotNull(message = "El ID del turno no puede estar vacío")
+    private Long turnoId;
 }

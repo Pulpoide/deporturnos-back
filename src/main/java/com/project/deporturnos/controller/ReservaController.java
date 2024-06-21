@@ -3,6 +3,7 @@ package com.project.deporturnos.controller;
 import com.project.deporturnos.entity.dto.GeneralResponseDTO;
 import com.project.deporturnos.entity.dto.ReservaRequestDTO;
 import com.project.deporturnos.entity.dto.ReservaRequestUpdateDTO;
+import com.project.deporturnos.entity.dto.ReservaRequestUpdateByUserDTO;
 import com.project.deporturnos.entity.dto.ReservaResponseDTO;
 import com.project.deporturnos.service.IReservaService;
 import jakarta.validation.Valid;
@@ -12,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
 
 @RestController
 @CrossOrigin
@@ -38,14 +40,14 @@ public class ReservaController {
     // Endpoint para actualizar una reserva
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<ReservaResponseDTO> update(@PathVariable Long id, @Valid @RequestBody ReservaRequestUpdateDTO reservaRequestUpdateDTO) {
+    public ResponseEntity<ReservaResponseDTO> update(@PathVariable("id") Long id, @Valid @RequestBody ReservaRequestUpdateDTO reservaRequestUpdateDTO) {
         return ResponseEntity.ok(reservaService.update(id, reservaRequestUpdateDTO));
     }
 
     // Endoint para eliminar reserva
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
+    public ResponseEntity<?> delete(@PathVariable("id") Long id) {
         reservaService.delete(id);
         return ResponseEntity.ok(new GeneralResponseDTO("Reserva eliminada correctamente"));
     }
@@ -59,6 +61,21 @@ public class ReservaController {
     @PostMapping("/byuser")
     public ResponseEntity<?> saveReservaByUser(@Valid @RequestBody ReservaRequestDTO reservaRequestDTO) {
         return ResponseEntity.ok(reservaService.saveReservaByUser(reservaRequestDTO));
+    }
+
+    // Endpoint para cancelar una reserva
+    @PreAuthorize("hasRole('ROLE_CLIENTE') or hasRole('ROLE_ADMIN')")
+    @PutMapping("/{id}/cancelar")
+    public ResponseEntity<?> cancel(@PathVariable("id") Long id) {
+        reservaService.cancel(id);
+        return ResponseEntity.ok(new GeneralResponseDTO("Reserva cancelada"));
+    }
+
+    // Endpoint para modificar el turno de una reserva
+    @PreAuthorize("hasRole('ROLE_CLIENTE') or hasRole('ROLE_ADMIN')")
+    @PutMapping("/{id}/turno")
+    public ResponseEntity<ReservaResponseDTO> updateReservaByUser(@PathVariable("id") Long id, @Valid @RequestBody ReservaRequestUpdateByUserDTO reservaRequestUpdateByUserDTO) {
+        return ResponseEntity.ok(reservaService.updateReservaByUser(id, reservaRequestUpdateByUserDTO));
     }
 
 

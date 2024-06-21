@@ -39,14 +39,14 @@ public class TurnoController {
     // Endpoint para actualizar un turno
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<TurnoResponseDTO> update(@PathVariable Long id, @Valid @RequestBody TurnoRequestUpdateDTO turnoRequestUpdateDTO) {
+    public ResponseEntity<TurnoResponseDTO> update(@PathVariable("id") Long id, @Valid @RequestBody TurnoRequestUpdateDTO turnoRequestUpdateDTO) {
         return ResponseEntity.ok(turnoService.update(id, turnoRequestUpdateDTO));
     }
 
     // Endoint para eliminar turno
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
+    public ResponseEntity<?> delete(@PathVariable("id") Long id) {
         turnoService.delete(id);
         return ResponseEntity.ok(new GeneralResponseDTO("Turno eliminado correctamente"));
     }
