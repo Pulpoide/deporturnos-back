@@ -134,6 +134,10 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
             throw new ResourceNotFoundException("Usuario no encontrado");
         }
 
+        if(id == 1){
+            throw new IllegalArgumentException("No es posible cambiarle el roll al administrador supremo");
+        }
+
         Usuario usuario = usuarioOptional.get();
 
         if(usuarioOptional.get().getRol().equals(Rol.ADMIN)){
