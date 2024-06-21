@@ -7,6 +7,7 @@ import com.project.deporturnos.entity.domain.TurnoState;
 import com.project.deporturnos.entity.dto.TurnoRequestDTO;
 import com.project.deporturnos.entity.dto.TurnoRequestUpdateDTO;
 import com.project.deporturnos.entity.dto.TurnoResponseDTO;
+import com.project.deporturnos.exception.CanchaNotAvailableException;
 import com.project.deporturnos.exception.ResourceNotFoundException;
 import com.project.deporturnos.exception.TurnoStartTimeAlreadyExistException;
 import com.project.deporturnos.repository.ICanchaRepository;
@@ -48,14 +49,20 @@ public class TurnoService implements ITurnoService {
         }
 
         if(turnoRequestDTO.getHoraInicio().equals(turnoRequestDTO.getHoraFin())){
-            throw new IllegalArgumentException("La hora de inicio no puede ser igual a la hora de fin");
+            throw new TurnoStartTimeAlreadyExistException("La hora de inicio no puede ser igual a la hora de fin");
         }
 
         turno.setFecha(turnoRequestDTO.getFecha());
         turno.setHoraInicio(turnoRequestDTO.getHoraInicio());
         turno.setHoraFin(turnoRequestDTO.getHoraFin());
         turno.setEstado(TurnoState.DISPONIBLE);
-        turno.setCancha(cancha);
+
+        if(cancha.isDisponibilidad()){
+            turno.setCancha(cancha);
+        }else{
+            throw new CanchaNotAvailableException("La cancha no está disponible");
+        }
+
 
 
         Turno turnoSaved = turnoRepository.save(turno);
