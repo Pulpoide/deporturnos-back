@@ -15,5 +15,5 @@ public interface ITurnoService {
 
     void delete(Long id);
 
-    List<TurnoResponseDTO> getAllAvailable();
+    List<TurnoResponseDTO> getAllAvailable(Long id);
 }
