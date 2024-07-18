@@ -54,11 +54,11 @@ public class TurnoController {
 
     // Endpoints para ROLE_CLIENTE o ROLE_ADMIN
 
-    // Endpoint para obtener todos los turnos con TurnoState.DISPONIBLE
+    // Endpoint para obtener todos los turnos con TurnoState.DISPONIBLE de una cancha en espécífico
     @PreAuthorize("hasRole('ROLE_CLIENTE') or hasRole('ROLE_ADMIN')")
-    @GetMapping("/disponibles")
-    public ResponseEntity<List<TurnoResponseDTO>> getAllAvailable() {
-        return ResponseEntity.ok(turnoService.getAllAvailable());
+    @GetMapping("/disponibles/{id}/cancha")
+    public ResponseEntity<List<TurnoResponseDTO>> getAllAvailable(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(turnoService.getAllAvailable(id));
     }
 
 

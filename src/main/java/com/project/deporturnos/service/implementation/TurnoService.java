@@ -134,7 +134,7 @@ public class TurnoService implements ITurnoService {
     }
 
     @Override
-    public List<TurnoResponseDTO> getAllAvailable() {
+    public List<TurnoResponseDTO> getAllAvailable(Long id) {
 
         List<Turno> turnos = turnoRepository.findAll();
 
@@ -145,10 +145,11 @@ public class TurnoService implements ITurnoService {
         List<TurnoResponseDTO> turnoAvailableResponseDTOS = new ArrayList<>();
         for(Turno turno : turnos){
             if(turno.getEstado().equals(TurnoState.DISPONIBLE)) {
-                turnoAvailableResponseDTOS.add(mapper.convertValue(turno, TurnoResponseDTO.class));
+                if(turno.getCancha().getId().equals(id)) {
+                    turnoAvailableResponseDTOS.add(mapper.convertValue(turno, TurnoResponseDTO.class));
+                }
             }
         }
-
 
         return turnoAvailableResponseDTOS;
     }
