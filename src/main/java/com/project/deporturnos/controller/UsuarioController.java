@@ -27,7 +27,7 @@ public class UsuarioController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping
     public ResponseEntity<?> getAll() {
-        return ResponseEntity.ok(usuarioService.getAllUsuarios().getContent());
+        return ResponseEntity.ok(usuarioService.getAll());
     }
 
     // Endpoint para actualizar usuario
@@ -67,7 +67,7 @@ public class UsuarioController {
     @PreAuthorize("hasRole('ROLE_CLIENTE') or hasRole('ROLE_ADMIN')")
     @PutMapping("/{id}/profile")
     public ResponseEntity<UsuarioResponseDTO> updateCurrentUser(@PathVariable("id") Long id, @Valid @RequestBody UsuarioRequestUpdateDTO usuarioRequestUpdateDTO) {
-        return ResponseEntity.ok(usuarioService.update(id, usuarioRequestUpdateDTO));
+        return ResponseEntity.ok(usuarioService.updateProfile(id, usuarioRequestUpdateDTO));
     }
 
     // Listar Reservas de Usuario

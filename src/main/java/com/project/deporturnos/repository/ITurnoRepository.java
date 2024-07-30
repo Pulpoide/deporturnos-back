@@ -2,6 +2,7 @@ package com.project.deporturnos.repository;
 
 import com.project.deporturnos.entity.domain.Turno;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.stereotype.Repository;
 
@@ -12,4 +13,7 @@ import java.util.List;
 public interface ITurnoRepository extends JpaRepository<Turno, Long> {
 
     List<Turno> findByCanchaId(Long cancha_id);
+
+    @Query("SELECT t FROM Turno t WHERE t.deleted = false")
+    List<Turno> findAllByDeletedFalse();
 }

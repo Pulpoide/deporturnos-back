@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
 
 import java.util.Set;
 
@@ -11,6 +12,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
+@SQLDelete(sql = "UPDATE cancha SET deleted = true WHERE id=?")
 public class Cancha {
 
     @Id
@@ -38,5 +40,8 @@ public class Cancha {
     @OneToMany(mappedBy = "cancha")
     @JsonIgnore
     private Set<Turno> turnos;
+
+    @Column
+    private boolean deleted = Boolean.FALSE;
 }
 

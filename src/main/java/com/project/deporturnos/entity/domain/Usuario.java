@@ -1,15 +1,18 @@
 package com.project.deporturnos.entity.domain;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Setter
@@ -17,6 +20,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@SQLDelete(sql="UPDATE usuario SET deleted = true WHERE id=?")
 public class Usuario implements UserDetails {
 
     @Id
@@ -42,6 +46,14 @@ public class Usuario implements UserDetails {
 
     @Column(name = "cuenta_activada", nullable = false)
     private boolean cuentaActivada;
+
+    @Column
+    private boolean deleted = Boolean.FALSE;
+
+    @OneToMany(mappedBy = "usuario")
+    @JsonIgnore
+    private Set<Reserva> reservas;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

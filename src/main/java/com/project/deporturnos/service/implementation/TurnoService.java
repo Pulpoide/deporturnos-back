@@ -43,7 +43,7 @@ public class TurnoService implements ITurnoService {
 
         // Validamos que no exista otro turno con la misma hora de inicio para la cancha
         for(Turno turno1 : cancha.getTurnos()){
-            if(turno1.getHoraInicio().equals(turnoRequestDTO.getHoraInicio())){
+            if(!turno1.isDeleted() && turno1.getHoraInicio().equals(turnoRequestDTO.getHoraInicio())){
                 throw new TurnoStartTimeAlreadyExistException("Ya existe un turno con esa hora de inicio para esta cancha");
             }
         }
@@ -71,7 +71,7 @@ public class TurnoService implements ITurnoService {
 
     @Override
     public List<TurnoResponseDTO> getAll() {
-        List<Turno> turnos = turnoRepository.findAll();
+        List<Turno> turnos = turnoRepository.findAllByDeletedFalse();
 
         if(turnos.isEmpty()){
             throw new ResourceNotFoundException("No se encontraron turnos para listar");
@@ -97,7 +97,7 @@ public class TurnoService implements ITurnoService {
 
         // Validamos que no exista otro turno con la misma hora de inicio para la cancha
         for(Turno turno1 : turno.getCancha().getTurnos()){
-            if(turno1.getHoraInicio().equals(turnoRequestUpdateDTO.getHoraInicio())){
+            if(!turno1.isDeleted() && turno1.getHoraInicio().equals(turnoRequestUpdateDTO.getHoraInicio())){
                 throw new TurnoStartTimeAlreadyExistException("Ya existe un turno con esa hora de inicio para esta cancha");
             }
         }
@@ -119,6 +119,16 @@ public class TurnoService implements ITurnoService {
             turno.setEstado(turnoRequestUpdateDTO.getEstado());
         }
 
+        if(turnoRequestUpdateDTO.getCanchaId() != null){
+            Cancha cancha = canchaRepository.findById(turnoRequestUpdateDTO.getCanchaId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Cancha no encontrado"));
+            if(cancha.isDisponibilidad()) {
+                turno.setCancha(cancha);
+            }else{
+                throw new CanchaNotAvailableException("Cancha no disponible");
+            }
+        }
+
         Turno turnoUpdated = turnoRepository.save(turno);
         return mapper.convertValue(turnoUpdated, TurnoResponseDTO.class);
     }
@@ -126,10 +136,17 @@ public class TurnoService implements ITurnoService {
     @Override
     public void delete(Long id) {
         Optional<Turno> turnoOptional = turnoRepository.findById(id);
-        if(turnoOptional.isPresent()){
-            turnoRepository.deleteById(id);
-        }else{
-            throw new ResourceNotFoundException("Turno no encontrado");
+
+        turnoOptional.ifPresent(turno -> {
+            turno.setDeleted(true);
+            turno.getReservas().forEach(reserva -> {
+                reserva.setDeleted(true);
+            });
+            turnoRepository.save(turno);
+        });
+
+        if (turnoOptional.isEmpty()) {
+        throw new ResourceNotFoundException("Turno no encontrado");
         }
     }
 

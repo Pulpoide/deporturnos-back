@@ -3,6 +3,7 @@ package com.project.deporturnos.service;
 import com.project.deporturnos.entity.domain.Reserva;
 import com.project.deporturnos.entity.dto.*;
 
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 
 import com.project.deporturnos.entity.domain.Usuario;
@@ -15,6 +16,8 @@ public interface IUsuarioService {
 
     UsuarioResponseDTO update(Long id, UsuarioRequestUpdateDTO usuarioRequestUpdateDTO);
 
+    List<UsuarioResponseDTO> getAll();
+
     void delete(Long id);
 
     UsuarioResponseDTO changeRole(Long id);
@@ -22,4 +25,6 @@ public interface IUsuarioService {
     LockUnlockResponseDTO lockUnlock(Long id);
 
     List<Reserva> findReservationsByUserId(Long id);
+
+    UsuarioResponseDTO updateProfile(Long id, @Valid UsuarioRequestUpdateDTO usuarioRequestUpdateDTO);
 }

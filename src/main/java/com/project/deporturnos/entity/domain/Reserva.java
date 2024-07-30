@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
 
 import java.time.LocalDate;
 
@@ -13,6 +14,7 @@ import java.time.LocalDate;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@SQLDelete(sql = "UPDATE reserva SET deleted = true WHERE id=?")
 public class Reserva {
 
     @Id
@@ -33,6 +35,9 @@ public class Reserva {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ReservaState estado;
+
+    @Column
+    private boolean deleted = Boolean.FALSE;
 
 }
 

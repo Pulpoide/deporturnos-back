@@ -17,4 +17,5 @@ public interface ICanchaService {
     void delete(Long id);
 
     List<CanchaResponseDTO> getAllAvailable();
+
 }
