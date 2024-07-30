@@ -39,6 +39,8 @@ public class AuthService {
         String token = jwtService.getToken(user.get());
 
         return LoginResponseDTO.builder()
+                .id(user.get().getId())
+                .nombre(user.get().getNombre())
                 .token(token)
                 .build();
     }

@@ -2,7 +2,7 @@ package com.project.deporturnos.service.implementation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.deporturnos.entity.domain.Cancha;
-import com.project.deporturnos.entity.domain.Deporte;
+import com.project.deporturnos.entity.domain.TurnoState;
 import com.project.deporturnos.entity.dto.CanchaRequestDTO;
 import com.project.deporturnos.entity.dto.CanchaRequestUpdateDTO;
 import com.project.deporturnos.entity.dto.CanchaResponseDTO;
@@ -31,7 +31,6 @@ public class CanchaService implements ICanchaService {
         Cancha cancha = mapper.convertValue(canchaRequestDTO, Cancha.class);
 
         cancha.setDisponibilidad(true);
-        cancha.setDeporte(Deporte.FUTBOL);
 
         Cancha canchaSaved = canchaRepository.save(cancha);
         return mapper.convertValue(canchaSaved, CanchaResponseDTO.class);
@@ -40,7 +39,7 @@ public class CanchaService implements ICanchaService {
 
     @Override
     public List<CanchaResponseDTO> getAll(){
-        List<Cancha> canchas = canchaRepository.findAll();
+        List<Cancha> canchas = canchaRepository.findAllByDeletedFalse();
 
         if(canchas.isEmpty()){
             throw new ResourceNotFoundException("No se encontraron canchas para listar");
@@ -90,14 +89,27 @@ public class CanchaService implements ICanchaService {
 
 
     @Override
-    public void delete(Long id){
+    public void delete(Long id) {
         Optional<Cancha> canchaOptional = canchaRepository.findById(id);
-        if(canchaOptional.isPresent()){
-            canchaRepository.deleteById(id);
-        }else{
+
+        canchaOptional.ifPresent(cancha -> {
+            cancha.setDeleted(true);
+            cancha.getTurnos().forEach(turno -> {
+                turno.setDeleted(true);
+                turno.setEstado(TurnoState.BORRADO);
+                turno.getReservas().forEach(reserva -> {
+                    reserva.setDeleted(true);
+                });
+            });
+            canchaRepository.save(cancha);
+        });
+
+        if (canchaOptional.isEmpty()) {
             throw new ResourceNotFoundException("Cancha no encontrada");
         }
     }
+
+
 
     @Override
     public List<CanchaResponseDTO> getAllAvailable() {

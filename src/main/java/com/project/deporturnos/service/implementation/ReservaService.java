@@ -71,7 +71,7 @@ public class ReservaService implements IReservaService {
 
     @Override
     public List<ReservaResponseDTO> getAll() {
-        List<Reserva> reservas = reservaRepository.findAll();
+        List<Reserva> reservas = reservaRepository.findAllByDeletedFalse();
 
         if(reservas.isEmpty()){
             throw new ResourceNotFoundException("No se encontraron reservas para listar");
@@ -95,7 +95,14 @@ public class ReservaService implements IReservaService {
 
         Reserva reserva = reservaOptional.get();
 
+        //Manejo de estados
         if(reservaRequestUpdateDTO.getEstado() != null){
+            ReservaState reservaState = reservaRequestUpdateDTO.getEstado();
+            if(reservaState.equals(ReservaState.CANCELADA)){
+                reserva.getTurno().setEstado(TurnoState.DISPONIBLE);
+            } else if (reservaState.equals(ReservaState.CONFIRMADA)) {
+                reserva.getTurno().setEstado(TurnoState.RESERVADO);
+            }
             reserva.setEstado(reservaRequestUpdateDTO.getEstado());
         }
 
@@ -104,7 +111,7 @@ public class ReservaService implements IReservaService {
                     .orElseThrow(() -> new ResourceNotFoundException("Turno no encontrado"));
 
             if(turno.getEstado().equals(TurnoState.RESERVADO)){
-                throw new TurnoAlreadyReservedException("Turno no disponible");
+                throw new TurnoAlreadyReservedException("Turno no disponibles");
             }
             reserva.setTurno(turno);
             turno.setEstado(TurnoState.RESERVADO);

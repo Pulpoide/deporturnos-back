@@ -1,9 +1,7 @@
 package com.project.deporturnos.service.implementation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.deporturnos.entity.domain.Reserva;
-import com.project.deporturnos.entity.domain.Rol;
-import com.project.deporturnos.entity.domain.Usuario;
+import com.project.deporturnos.entity.domain.*;
 import com.project.deporturnos.entity.dto.LockUnlockResponseDTO;
 import com.project.deporturnos.entity.dto.UsuarioRequestUpdateDTO;
 import com.project.deporturnos.entity.dto.UsuarioResponseDTO;
@@ -25,6 +23,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -52,12 +51,41 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
         return usuarioRepository.findAll(Pageable.unpaged());
     }
 
+    @Override
+    public List<UsuarioResponseDTO> getAll(){
+        List<Usuario> usuarios = usuarioRepository.findAllByDeletedFalse();
+
+        if(usuarios.isEmpty()){
+            throw new ResourceNotFoundException("No se encontraron usuarios para listar");
+        }
+
+        List<UsuarioResponseDTO> usuarioResponseDTOS = new ArrayList<>();
+        for(Usuario usuario : usuarios){
+            usuarioResponseDTOS.add(mapper.convertValue(usuario, UsuarioResponseDTO.class));
+        }
+
+        return usuarioResponseDTOS;
+    }
+
 
     @Override
     public void delete(Long id){
         Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
         if(usuarioOptional.isPresent()){
-            usuarioRepository.deleteById(id);
+            Usuario usuario = usuarioOptional.get();
+            usuario.setDeleted(true);
+
+            // Marcamos todas las reservas del usuario como eliminadas
+            for(Reserva reserva : usuario.getReservas()){
+                reserva.setDeleted(true);
+
+                // Ponemos el turno asociado a la reserva en estado DISPONIBLE si todas sus reservas estan eliminadas
+                Turno turno = reserva.getTurno();
+                boolean allReservasDeleted = turno.getReservas().stream().allMatch(Reserva::isDeleted);
+                if (allReservasDeleted) {
+                    turno.setEstado(TurnoState.DISPONIBLE);
+                }
+            }
         }else{
             throw new ResourceNotFoundException("Usuario no encontrado");
         }
@@ -66,19 +94,14 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
 
     @Override
     public UsuarioResponseDTO update(Long id, UsuarioRequestUpdateDTO usuarioRequestUpdateDTO){
+        return getUsuarioResponseDTO(id, usuarioRequestUpdateDTO);
+    }
 
-        Usuario currentUser = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if(currentUser.getRol().equals(Rol.CLIENTE)) {
-            if (!id.equals(currentUser.getId())) {
-                throw new InsufficientAuthenticationException("No autorizado");
-            }
-        }
-
+    private UsuarioResponseDTO getUsuarioResponseDTO(Long id, UsuarioRequestUpdateDTO usuarioRequestUpdateDTO) {
         Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
         if(usuarioOptional.isEmpty()){
             throw new ResourceNotFoundException("Usuario no encontrado");
         }
-
 
         Usuario usuario = usuarioOptional.get();
 
@@ -90,7 +113,7 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
 
             // Validación de email
             String regex = "^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,}$";
-            java.util.regex.Pattern pattern = Pattern.compile(regex);
+            Pattern pattern = Pattern.compile(regex);
             Matcher matcher = pattern.matcher(usuarioRequestUpdateDTO.getEmail());
             if (!matcher.matches()) {
                 throw new InvalidEmailException("Correo electrónico no válido");
@@ -108,7 +131,7 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
 
             // Validación de password
             String regexPass = "^(?=\\w*\\d)(?=\\w*[a-z])\\S{8,16}$";
-            java.util.regex.Pattern patternPass = Pattern.compile(regexPass);
+            Pattern patternPass = Pattern.compile(regexPass);
             Matcher matcherPass = patternPass.matcher(usuarioRequestUpdateDTO.getPassword());
             if (!matcherPass.matches()) {
                 throw new InvalidPasswordException("Contraseña no válida");
@@ -176,6 +199,20 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
             }
         }
         return reservaRepository.findByUsuarioId(id);
+    }
+
+    @Override
+    public UsuarioResponseDTO updateProfile(Long id, UsuarioRequestUpdateDTO usuarioRequestUpdateDTO) {
+
+       Usuario currentUser = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if(currentUser.getRol().equals(Rol.CLIENTE)) {
+            if (!id.equals(currentUser.getId())) {
+                throw new InsufficientAuthenticationException("No autorizado");
+            }
+        }
+
+        return getUsuarioResponseDTO(id, usuarioRequestUpdateDTO);
+
     }
 
 

@@ -24,5 +24,7 @@ public class TurnoRequestUpdateDTO {
     private LocalTime horaFin;
     @Nullable
     private TurnoState estado;
+    @Nullable
+    private Long canchaId;
 
 }
