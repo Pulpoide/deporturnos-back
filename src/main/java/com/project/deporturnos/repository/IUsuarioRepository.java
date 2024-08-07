@@ -22,4 +22,5 @@ import java.util.Optional;
     @Query("SELECT u FROM Usuario u WHERE u.deleted = false")
     List<Usuario> findAllByDeletedFalse();
 
+    Optional<Usuario> findByVerificationCode(String verificationCode);
 }

@@ -4,6 +4,7 @@ import com.project.deporturnos.entity.dto.TurnoRequestDTO;
 import com.project.deporturnos.entity.dto.TurnoRequestUpdateDTO;
 import com.project.deporturnos.entity.dto.TurnoResponseDTO;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface ITurnoService {
@@ -15,5 +16,5 @@ public interface ITurnoService {
 
     void delete(Long id);
 
-    List<TurnoResponseDTO> getAllAvailable(Long id);
+    List<TurnoResponseDTO> getAllAvailableByCanchaAndDate(Long id, LocalDate fecha);
 }

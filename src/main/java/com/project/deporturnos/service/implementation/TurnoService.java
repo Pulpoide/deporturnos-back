@@ -16,6 +16,7 @@ import com.project.deporturnos.service.ITurnoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -151,7 +152,7 @@ public class TurnoService implements ITurnoService {
     }
 
     @Override
-    public List<TurnoResponseDTO> getAllAvailable(Long id) {
+    public List<TurnoResponseDTO> getAllAvailableByCanchaAndDate(Long id, LocalDate fecha) {
 
         List<Turno> turnos = turnoRepository.findAll();
 
@@ -163,7 +164,9 @@ public class TurnoService implements ITurnoService {
         for(Turno turno : turnos){
             if(turno.getEstado().equals(TurnoState.DISPONIBLE)) {
                 if(turno.getCancha().getId().equals(id)) {
-                    turnoAvailableResponseDTOS.add(mapper.convertValue(turno, TurnoResponseDTO.class));
+                    if(turno.getFecha().equals(fecha)) {
+                        turnoAvailableResponseDTOS.add(mapper.convertValue(turno, TurnoResponseDTO.class));
+                    }
                 }
             }
         }

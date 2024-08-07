@@ -52,8 +52,8 @@ public class CanchaController {
 
     // Endpoint para obtener todas las canchas disponibles
     @PreAuthorize("hasRole('ROLE_CLIENTE') or hasRole('ROLE_ADMIN')")
-    @GetMapping("/disponibles")
-    public ResponseEntity<List<CanchaResponseDTO>> getAllAvailable() {
-        return ResponseEntity.ok(canchaService.getAllAvailable());
+    @GetMapping("/disponibles/{deporte}")
+    public ResponseEntity<List<CanchaResponseDTO>> getAvailableByDeporte(@PathVariable String deporte) {
+        return ResponseEntity.ok(canchaService.getAvailableByDeporte(deporte));
     }
 }

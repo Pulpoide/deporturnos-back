@@ -12,7 +12,11 @@ public class LoginResponseDTO {
 
     private Long id;
 
+    private String nombre;
+
+    private String email;
+
     private String token;
 
-    private String nombre;
+    private long expiresIn;
 }

@@ -24,7 +24,7 @@ public class UsuarioAdminLoader implements ApplicationRunner {
                 .email("admin@gmail.com")
                 .password(passwordEncoder.encode("password123/*"))
                 .rol(Rol.ADMIN)
-                .cuentaActivada(true)
+                .activada(true)
                 .build();
 
         if(usuarioRepository.findByEmail(usuario.getEmail()).isEmpty()){

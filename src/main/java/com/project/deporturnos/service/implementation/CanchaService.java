@@ -112,7 +112,7 @@ public class CanchaService implements ICanchaService {
 
 
     @Override
-    public List<CanchaResponseDTO> getAllAvailable() {
+    public List<CanchaResponseDTO> getAvailableByDeporte(String deporte) {
 
         List<Cancha> canchas = canchaRepository.findAll();
 
@@ -121,11 +121,11 @@ public class CanchaService implements ICanchaService {
         }
 
         List<CanchaResponseDTO> canchaAvailableResponseDTOS = new ArrayList<>();
-        for(Cancha cancha : canchas){
-            if(cancha.isDisponibilidad()){
-                canchaAvailableResponseDTOS.add(mapper.convertValue(cancha, CanchaResponseDTO.class));
-            }
-        }
+       for(Cancha cancha : canchas){
+           if(!cancha.isDeleted() && cancha.isDisponibilidad() && cancha.getDeporte().toString().equals(deporte.toUpperCase())){
+              canchaAvailableResponseDTOS.add(mapper.convertValue(cancha, CanchaResponseDTO.class));
+          }
+       }
 
         return canchaAvailableResponseDTOS;
     }

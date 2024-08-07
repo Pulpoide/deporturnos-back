@@ -24,6 +24,6 @@ public class UsuarioResponseDTO {
 
     private Rol rol;
 
-    private boolean cuentaActivada;
+    private boolean activada;
 
 }

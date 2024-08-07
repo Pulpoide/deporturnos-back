@@ -74,6 +74,7 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
         if(usuarioOptional.isPresent()){
             Usuario usuario = usuarioOptional.get();
             usuario.setDeleted(true);
+            usuario.setActivada(false);
 
             // Marcamos todas las reservas del usuario como eliminadas
             for(Reserva reserva : usuario.getReservas()){
@@ -86,6 +87,7 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
                     turno.setEstado(TurnoState.DISPONIBLE);
                 }
             }
+            usuarioRepository.save(usuario);
         }else{
             throw new ResourceNotFoundException("Usuario no encontrado");
         }
@@ -183,7 +185,7 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
 
         Usuario usuario = usuarioOptional.get();
 
-        usuario.setCuentaActivada(!usuarioOptional.get().isCuentaActivada());
+        usuario.setActivada(!usuarioOptional.get().isActivada());
 
         Usuario usuarioSaved = usuarioRepository.save(usuario);
         return mapper.convertValue(usuarioSaved, LockUnlockResponseDTO.class);
