@@ -25,4 +25,6 @@ public class CanchaResponseDTO {
     private String descripcion;
 
     private Deporte deporte;
+
+    private int turnosDisponibles;
 }

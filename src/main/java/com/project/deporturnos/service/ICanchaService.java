@@ -16,6 +16,6 @@ public interface ICanchaService {
 
     void delete(Long id);
 
-    List<CanchaResponseDTO> getAllAvailable();
+    List<CanchaResponseDTO> getAvailableByDeporte(String deporte);
 
 }

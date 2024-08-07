@@ -10,6 +10,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -45,7 +46,13 @@ public class Usuario implements UserDetails {
     private Rol rol;
 
     @Column(name = "cuenta_activada", nullable = false)
-    private boolean cuentaActivada;
+    private boolean activada;
+
+    @Column(name = "verification_code")
+    private String verificationCode;
+
+    @Column(name = "verification_expire_date")
+    private LocalDateTime verificationCodeExpiresAt;
 
     @Column
     private boolean deleted = Boolean.FALSE;
@@ -53,7 +60,6 @@ public class Usuario implements UserDetails {
     @OneToMany(mappedBy = "usuario")
     @JsonIgnore
     private Set<Reserva> reservas;
-
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -82,7 +88,7 @@ public class Usuario implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return this.isCuentaActivada();
+        return this.isActivada();
     }
 }
 

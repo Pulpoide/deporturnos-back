@@ -7,10 +7,12 @@ import com.project.deporturnos.entity.dto.TurnoResponseDTO;
 import com.project.deporturnos.service.ITurnoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -57,8 +59,8 @@ public class TurnoController {
     // Endpoint para obtener todos los turnos con TurnoState.DISPONIBLE de una cancha en espécífico
     @PreAuthorize("hasRole('ROLE_CLIENTE') or hasRole('ROLE_ADMIN')")
     @GetMapping("/disponibles/{id}/cancha")
-    public ResponseEntity<List<TurnoResponseDTO>> getAllAvailable(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(turnoService.getAllAvailable(id));
+    public ResponseEntity<List<TurnoResponseDTO>> getAllAvailableByCanchaAndDate(@PathVariable("id") Long id, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
+        return ResponseEntity.ok(turnoService.getAllAvailableByCanchaAndDate(id, fecha));
     }
 
 
