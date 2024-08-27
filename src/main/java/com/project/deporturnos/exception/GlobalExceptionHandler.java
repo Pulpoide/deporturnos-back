@@ -79,6 +79,12 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(new GeneralResponseDTO(ex.getMessage()),HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(VerificationEmailException.class)
+    public ResponseEntity<GeneralResponseDTO> handlerVerificationEmailException(VerificationEmailException ex)
+    {
+        return new ResponseEntity<>(new GeneralResponseDTO(ex.getMessage()),HttpStatus.BAD_REQUEST);
+    }
+
 
 
 

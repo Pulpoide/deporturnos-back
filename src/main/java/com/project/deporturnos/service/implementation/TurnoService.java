@@ -42,10 +42,10 @@ public class TurnoService implements ITurnoService {
 
         Turno turno = mapper.convertValue(turnoRequestDTO, Turno.class);
 
-        // Validamos que no exista otro turno con la misma hora de inicio para la cancha
+        // Validamos que no exista otro turno con la misma hora de inicio y la misma fecha para esa cancha
         for(Turno turno1 : cancha.getTurnos()){
-            if(!turno1.isDeleted() && turno1.getHoraInicio().equals(turnoRequestDTO.getHoraInicio())){
-                throw new TurnoStartTimeAlreadyExistException("Ya existe un turno con esa hora de inicio para esta cancha");
+            if(!turno1.isDeleted() && turno1.getHoraInicio().equals(turnoRequestDTO.getHoraInicio()) && turno1.getFecha().equals(turnoRequestDTO.getFecha())){
+                throw new TurnoStartTimeAlreadyExistException("Ya existe el turno que está intentando crear");
             }
         }
 
@@ -140,9 +140,7 @@ public class TurnoService implements ITurnoService {
 
         turnoOptional.ifPresent(turno -> {
             turno.setDeleted(true);
-            turno.getReservas().forEach(reserva -> {
-                reserva.setDeleted(true);
-            });
+            turno.getReservas().forEach(reserva -> reserva.setDeleted(true));
             turnoRepository.save(turno);
         });
 

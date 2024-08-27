@@ -2,9 +2,7 @@ package com.project.deporturnos.service.implementation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.deporturnos.entity.domain.*;
-import com.project.deporturnos.entity.dto.LockUnlockResponseDTO;
-import com.project.deporturnos.entity.dto.UsuarioRequestUpdateDTO;
-import com.project.deporturnos.entity.dto.UsuarioResponseDTO;
+import com.project.deporturnos.entity.dto.*;
 import com.project.deporturnos.exception.InvalidEmailException;
 import com.project.deporturnos.exception.InvalidPasswordException;
 import com.project.deporturnos.exception.ResourceNotFoundException;
@@ -13,8 +11,7 @@ import com.project.deporturnos.repository.IReservaRepository;
 import com.project.deporturnos.repository.IUsuarioRepository;
 import com.project.deporturnos.service.IUsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -45,12 +42,6 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
     @Autowired
     ObjectMapper mapper;
 
-
-    @Override
-    public Page<Usuario> getAllUsuarios() {
-        return usuarioRepository.findAll(Pageable.unpaged());
-    }
-
     @Override
     public List<UsuarioResponseDTO> getAll(){
         List<Usuario> usuarios = usuarioRepository.findAllByDeletedFalse();
@@ -66,7 +57,6 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
 
         return usuarioResponseDTOS;
     }
-
 
     @Override
     public void delete(Long id){
@@ -204,7 +194,7 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
     }
 
     @Override
-    public UsuarioResponseDTO updateProfile(Long id, UsuarioRequestUpdateDTO usuarioRequestUpdateDTO) {
+    public ProfileResUpdateDTO updateProfile(Long id, ProfileReqUpdateDTO profileReqUpdateDTO) {
 
        Usuario currentUser = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if(currentUser.getRol().equals(Rol.CLIENTE)) {
@@ -213,8 +203,56 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
             }
         }
 
-        return getUsuarioResponseDTO(id, usuarioRequestUpdateDTO);
+//        Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
+//        Usuario usuario = usuarioOptional.get();
 
+        if(profileReqUpdateDTO.getNombre() != null){
+            currentUser.setNombre(profileReqUpdateDTO.getNombre());
+        }
+        if(profileReqUpdateDTO.getTelefono() != null){
+            currentUser.setTelefono(profileReqUpdateDTO.getTelefono());
+        }
+
+        Usuario usuarioSaved = usuarioRepository.save(currentUser);
+
+
+        return mapper.convertValue(usuarioSaved, ProfileResUpdateDTO.class);
+
+    }
+
+    @Override
+    public ResponseEntity<?> changePassword(Long id, PasswordChangeRequestDTO passwordChangeRequestDTO) {
+        Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
+
+        if(usuarioOptional.isEmpty()){
+            throw new ResourceNotFoundException("Usuario no encontrado");
+        }
+
+        Usuario usuario = usuarioOptional.get();
+
+        // Verificación de la contraseña actual
+        if(!passwordEncoder.matches(passwordChangeRequestDTO.getOldPassword(), usuario.getPassword())){
+            throw new InvalidPasswordException("Contraseña actual incorrecta");
+        }
+
+        // Validación de la nueva contraseña
+        if (!passwordChangeRequestDTO.getNewPassword().equals(passwordChangeRequestDTO.getConfirmNewPassword())) {
+            throw new InvalidPasswordException("La nueva contraseña y su confirmación no coinciden");
+        }
+
+        // Validación de los requisitos de la nueva contraseña
+        String regexPass = "^(?=\\w*\\d)(?=\\w*[a-z])\\S{8,16}$";
+        Pattern patternPass = Pattern.compile(regexPass);
+        Matcher matcherPass = patternPass.matcher(passwordChangeRequestDTO.getNewPassword());
+
+        if (!matcherPass.matches()) {
+            throw new InvalidPasswordException("La nueva contraseña no cumple con los requisitos de seguridad: Debe tener al menos un número y un caracter");
+        }
+
+        usuario.setPassword(passwordEncoder.encode(passwordChangeRequestDTO.getNewPassword()));
+        usuarioRepository.save(usuario);
+
+        return ResponseEntity.ok(new ApiResponse(true, "Contraseña cambiada exitosamente"));
     }
 
 

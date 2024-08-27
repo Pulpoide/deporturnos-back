@@ -1,15 +1,14 @@
 package com.project.deporturnos.controller;
 
 import com.project.deporturnos.entity.domain.Reserva;
-import com.project.deporturnos.entity.dto.GeneralResponseDTO;
-import com.project.deporturnos.entity.dto.LockUnlockResponseDTO;
-import com.project.deporturnos.entity.dto.UsuarioRequestUpdateDTO;
-import com.project.deporturnos.entity.dto.UsuarioResponseDTO;
+import com.project.deporturnos.entity.domain.Usuario;
+import com.project.deporturnos.entity.dto.*;
 import com.project.deporturnos.service.IUsuarioService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -65,9 +64,9 @@ public class UsuarioController {
 
     // Actualizar Usuario
     @PreAuthorize("hasRole('ROLE_CLIENTE') or hasRole('ROLE_ADMIN')")
-    @PutMapping("/{id}/profile")
-    public ResponseEntity<UsuarioResponseDTO> updateCurrentUser(@PathVariable("id") Long id, @Valid @RequestBody UsuarioRequestUpdateDTO usuarioRequestUpdateDTO) {
-        return ResponseEntity.ok(usuarioService.updateProfile(id, usuarioRequestUpdateDTO));
+    @PutMapping("/{id}/edit-profile")
+    public ResponseEntity<ProfileResUpdateDTO> updateCurrentUser(@PathVariable("id") Long id, @Valid @RequestBody ProfileReqUpdateDTO profileReqUpdateDTO) {
+        return ResponseEntity.ok(usuarioService.updateProfile(id, profileReqUpdateDTO));
     }
 
     // Listar Reservas de Usuario
@@ -75,5 +74,13 @@ public class UsuarioController {
     @GetMapping("/{id}/reservas")
     public ResponseEntity<List<Reserva>> getUserReservations(@PathVariable("id") Long id) {
         return ResponseEntity.ok(usuarioService.findReservationsByUserId(id));
+    }
+
+    // Cambiar Contraseña
+    @PreAuthorize("hasRole('ROLE_CLIENTE') or hasRole('ROLE_ADMIN')")
+    @PutMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody PasswordChangeRequestDTO passwordChangeRequestDTO){
+        Usuario currentUser = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return ResponseEntity.ok(usuarioService.changePassword(currentUser.getId(), passwordChangeRequestDTO));
     }
 }
