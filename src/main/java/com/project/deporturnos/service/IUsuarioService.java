@@ -2,17 +2,11 @@ package com.project.deporturnos.service;
 
 import com.project.deporturnos.entity.domain.Reserva;
 import com.project.deporturnos.entity.dto.*;
-
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Page;
-
-import com.project.deporturnos.entity.domain.Usuario;
 
 import java.util.List;
 
 public interface IUsuarioService {
-
-    Page<Usuario> getAllUsuarios();
 
     UsuarioResponseDTO update(Long id, UsuarioRequestUpdateDTO usuarioRequestUpdateDTO);
 
@@ -26,5 +20,7 @@ public interface IUsuarioService {
 
     List<Reserva> findReservationsByUserId(Long id);
 
-    UsuarioResponseDTO updateProfile(Long id, @Valid UsuarioRequestUpdateDTO usuarioRequestUpdateDTO);
+    ProfileResUpdateDTO updateProfile(Long id, @Valid ProfileReqUpdateDTO profileReqUpdateDTO);
+
+    Object changePassword(Long id, PasswordChangeRequestDTO passwordChangeRequestDTO);
 }

@@ -9,6 +9,7 @@ import com.project.deporturnos.entity.dto.VerifyUserDTO;
 import com.project.deporturnos.exception.InvalidEmailException;
 import com.project.deporturnos.exception.InvalidPasswordException;
 import com.project.deporturnos.exception.UserAlreadyExistsException;
+import com.project.deporturnos.exception.VerificationEmailException;
 import com.project.deporturnos.repository.IUsuarioRepository;
 import com.project.deporturnos.security.JwtService;
 import jakarta.mail.MessagingException;
@@ -80,6 +81,7 @@ public class AuthService {
                 .nombre(request.getNombre())
                 .email(request.getEmail())
                 .token(token)
+                .telefono(request.getTelefono())
                 .build();
     }
 
@@ -107,8 +109,7 @@ public class AuthService {
         try {
             emailService.sendVerificationEmail(user.getEmail(), subject, htmlMessage);
         } catch (MessagingException e) {
-            // Handle email sending exception
-            e.printStackTrace();
+            throw new VerificationEmailException("Error al enviar código de verificación.");
         }
     }
 

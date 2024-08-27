@@ -51,19 +51,8 @@ public class AuthController {
     public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginRequestDTO loginRequestDTO){
         Usuario authenticatedUser = authService.authenticate(loginRequestDTO);
         String jwtToken = jwtService.getToken(authenticatedUser);
-        LoginResponse loginResponse = new LoginResponse(jwtToken, jwtService.getJwtExpirationTime(), loginRequestDTO.getEmail(), authenticatedUser.getId(), authenticatedUser.getNombre());
+        LoginResponse loginResponse = new LoginResponse(jwtToken, jwtService.getJwtExpirationTime(), loginRequestDTO.getEmail(), authenticatedUser.getId(), authenticatedUser.getNombre(), authenticatedUser.getTelefono());
         return ResponseEntity.ok(loginResponse);
     }
 
-//    // Endpoint para Registrar Usuario
-//    @PostMapping( "/register")
-//    public ResponseEntity<?> saveUsuario(@RequestBody RegistrationRequestDTO registrationRequestDTO) {
-//        return ResponseEntity.ok(authService.register(registrationRequestDTO));
-//    }
-//
-//    // Endpoint para Logear Usuario
-//    @PostMapping("/login")
-//    public ResponseEntity<?> loginUsuario(@RequestBody LoginRequestDTO loginDTO) {
-//        return ResponseEntity.ok(authService.login(loginDTO));
-//    }
 }
