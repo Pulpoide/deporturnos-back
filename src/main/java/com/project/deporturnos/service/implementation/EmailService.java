@@ -13,7 +13,7 @@ public class EmailService {
     @Autowired
     private JavaMailSender emailSender;
     @Async
-    public void sendVerificationEmail(String to, String subject, String body) throws MessagingException {
+    public void sendEmail(String to, String subject, String body) throws MessagingException {
         MimeMessage message = emailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
 

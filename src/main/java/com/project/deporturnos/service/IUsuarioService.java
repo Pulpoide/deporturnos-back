@@ -1,10 +1,13 @@
 package com.project.deporturnos.service;
 
 import com.project.deporturnos.entity.domain.Reserva;
+import com.project.deporturnos.entity.domain.Usuario;
 import com.project.deporturnos.entity.dto.*;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface IUsuarioService {
 
@@ -23,4 +26,8 @@ public interface IUsuarioService {
     ProfileResUpdateDTO updateProfile(Long id, @Valid ProfileReqUpdateDTO profileReqUpdateDTO);
 
     Object changePassword(Long id, PasswordChangeRequestDTO passwordChangeRequestDTO);
+
+    Optional<Usuario> findByEmail(String email);
+
+    ResponseEntity<?> resetPassword(Long userId, PasswordResetRequestDTO passwordResetRequestDTO);
 }

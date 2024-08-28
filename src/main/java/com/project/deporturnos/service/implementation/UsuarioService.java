@@ -136,8 +136,8 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
             usuario.setTelefono(usuarioRequestUpdateDTO.getTelefono());
         }
 
-        Usuario usuarioGuardado = usuarioRepository.save(usuario);
-        return mapper.convertValue(usuarioGuardado, UsuarioResponseDTO.class);
+        Usuario usuarioSaved = usuarioRepository.save(usuario);
+        return mapper.convertValue(usuarioSaved, UsuarioResponseDTO.class);
     }
 
 
@@ -203,9 +203,6 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
             }
         }
 
-//        Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
-//        Usuario usuario = usuarioOptional.get();
-
         if(profileReqUpdateDTO.getNombre() != null){
             currentUser.setNombre(profileReqUpdateDTO.getNombre());
         }
@@ -214,7 +211,6 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
         }
 
         Usuario usuarioSaved = usuarioRepository.save(currentUser);
-
 
         return mapper.convertValue(usuarioSaved, ProfileResUpdateDTO.class);
 
@@ -235,24 +231,33 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
             throw new InvalidPasswordException("Contraseña actual incorrecta");
         }
 
-        // Validación de la nueva contraseña
-        if (!passwordChangeRequestDTO.getNewPassword().equals(passwordChangeRequestDTO.getConfirmNewPassword())) {
+        // Validación y actualización de la nueva contraseña
+        validateAndUpdatePassword(mapper.convertValue(passwordChangeRequestDTO, PasswordResetRequestDTO.class), usuario);
+
+        return ResponseEntity.ok(new ApiResponse(true, "Contraseña cambiada exitosamente"));
+    }
+
+    private void validateAndUpdatePassword(PasswordResetRequestDTO passwordResetRequestDTO, Usuario usuario) {
+        if (!passwordResetRequestDTO.getNewPassword().equals(passwordResetRequestDTO.getConfirmNewPassword())) {
             throw new InvalidPasswordException("La nueva contraseña y su confirmación no coinciden");
         }
 
         // Validación de los requisitos de la nueva contraseña
         String regexPass = "^(?=\\w*\\d)(?=\\w*[a-z])\\S{8,16}$";
         Pattern patternPass = Pattern.compile(regexPass);
-        Matcher matcherPass = patternPass.matcher(passwordChangeRequestDTO.getNewPassword());
+        Matcher matcherPass = patternPass.matcher(passwordResetRequestDTO.getNewPassword());
 
         if (!matcherPass.matches()) {
             throw new InvalidPasswordException("La nueva contraseña no cumple con los requisitos de seguridad: Debe tener al menos un número y un caracter");
         }
 
-        usuario.setPassword(passwordEncoder.encode(passwordChangeRequestDTO.getNewPassword()));
+        usuario.setPassword(passwordEncoder.encode(passwordResetRequestDTO.getNewPassword()));
         usuarioRepository.save(usuario);
+    }
 
-        return ResponseEntity.ok(new ApiResponse(true, "Contraseña cambiada exitosamente"));
+    @Override
+    public Optional<Usuario> findByEmail(String email) {
+        return usuarioRepository.findByEmail(email);
     }
 
 
@@ -265,5 +270,20 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
         }
 
         throw new UsernameNotFoundException("User Not Found");
+    }
+
+    @Override
+    public ResponseEntity<?> resetPassword(Long userId, PasswordResetRequestDTO passwordResetRequestDTO){
+        Optional<Usuario> usuarioOptional = usuarioRepository.findById(userId);
+        if(usuarioOptional.isEmpty()){
+            throw new ResourceNotFoundException("Usuario no encontrado");
+        }
+
+        Usuario usuario = usuarioOptional.get();
+
+        // Validación y actualización de la nueva contraseña
+        validateAndUpdatePassword(passwordResetRequestDTO, usuario);
+
+        return ResponseEntity.ok(new ApiResponse(true, "Contraseña restablecida exitosamente."));
     }
 }

@@ -3,9 +3,11 @@ package com.project.deporturnos.controller;
 import com.project.deporturnos.entity.domain.Reserva;
 import com.project.deporturnos.entity.domain.Usuario;
 import com.project.deporturnos.entity.dto.*;
+import com.project.deporturnos.security.PasswordResetTokenService;
 import com.project.deporturnos.service.IUsuarioService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,6 +23,9 @@ public class UsuarioController {
 
     @Autowired
     private IUsuarioService usuarioService;
+
+    @Autowired
+    private PasswordResetTokenService passwordResetTokenService;
 
     // Endpoint para obtener todos los usuarios
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -83,4 +88,19 @@ public class UsuarioController {
         Usuario currentUser = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return ResponseEntity.ok(usuarioService.changePassword(currentUser.getId(), passwordChangeRequestDTO));
     }
+
+    // Restablecer Contraseña
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestParam("token") String token, @RequestBody PasswordResetRequestDTO passwordResetRequestDTO){
+        boolean isValid  = passwordResetTokenService.validateToken(token);
+
+        if (!isValid) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token inválido o expirado.");
+        }
+
+        Usuario usuario = passwordResetTokenService.getUserByToken(token);
+        return usuarioService.resetPassword(usuario.getId(), passwordResetRequestDTO);
+    }
+
+
 }
