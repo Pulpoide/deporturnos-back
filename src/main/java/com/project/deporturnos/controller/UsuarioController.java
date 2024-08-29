@@ -90,6 +90,7 @@ public class UsuarioController {
     }
 
     // Restablecer Contraseña
+    @PreAuthorize("hasRole('ROLE_CLIENTE') or hasRole('ROLE_ADMIN')")
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestParam("token") String token, @RequestBody PasswordResetRequestDTO passwordResetRequestDTO){
         boolean isValid  = passwordResetTokenService.validateToken(token);
