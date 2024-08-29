@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class PasswordResetTokenService {
@@ -35,12 +36,13 @@ public class PasswordResetTokenService {
     @Autowired
     private UsuarioService usuarioService;
 
-    public String generateToken(String email) {
+    public String generateToken(String email, List<String> roles) {
         return Jwts.builder()
                 .setSubject(email)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationTime))
                 .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(SECRET_KEY)), SignatureAlgorithm.HS256)
+                .claim("roles", roles)
                 .compact();
     }
 
@@ -56,7 +58,7 @@ public class PasswordResetTokenService {
 
     public void sendResetToken(String email, String token) {
         String subject = "Restablecimiento de Contraseña";
-        String resetUrl = "http://localhost:8080/api/usuarios/reset-password?token=" + token;
+        String resetUrl = "http://localhost:5173/client-resetpassword?token=" + token;
         String htmlMessage = "<html>"
                 + "<body style=\"font-family: Arial, sans-serif;\">"
                 + "<div style=\"background-color: #f5f5f5; padding: 20px;\">"

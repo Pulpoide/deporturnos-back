@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -70,7 +71,8 @@ public class AuthController {
     public ResponseEntity<String> forgotPassword(@RequestParam("email") String email){
         Optional<Usuario> userOptional = usuarioService.findByEmail(email);
         if(userOptional.isPresent()){
-            String token = passwordResetTokenService.generateToken(email);
+            List<String> roles = List.of("CLIENTE");
+            String token = passwordResetTokenService.generateToken(email, roles);
             passwordResetTokenService.sendResetToken(email, token);
             return ResponseEntity.ok("Fue enviado un link a tu email para restablecer tu contraseña.");
         }
