@@ -49,7 +49,7 @@ public class ReservaController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") Long id) {
         reservaService.delete(id);
-        return ResponseEntity.ok(new GeneralResponseDTO("Reserva eliminada correctamente"));
+        return ResponseEntity.ok(new GeneralResponseDTO("Reserva eliminada correctamente."));
     }
 
 
@@ -68,7 +68,7 @@ public class ReservaController {
     @PutMapping("/{id}/cancelar")
     public ResponseEntity<?> cancel(@PathVariable("id") Long id) {
         reservaService.cancel(id);
-        return ResponseEntity.ok(new GeneralResponseDTO("Reserva cancelada"));
+        return ResponseEntity.ok(new GeneralResponseDTO("Reserva cancelada."));
     }
 
     // Endpoint para modificar el turno de una reserva

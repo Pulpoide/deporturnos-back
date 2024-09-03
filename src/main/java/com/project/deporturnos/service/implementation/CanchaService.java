@@ -42,7 +42,7 @@ public class CanchaService implements ICanchaService {
         List<Cancha> canchas = canchaRepository.findAllByDeletedFalse();
 
         if(canchas.isEmpty()){
-            throw new ResourceNotFoundException("No se encontraron canchas para listar");
+            throw new ResourceNotFoundException("No se encontraron canchas para listar.");
         }
 
         List<CanchaResponseDTO> canchaResponseDTOS = new ArrayList<>();
@@ -59,7 +59,7 @@ public class CanchaService implements ICanchaService {
         Optional<Cancha> canchaOptional = canchaRepository.findById(id);
 
         if(canchaOptional.isEmpty()){
-            throw new ResourceNotFoundException("Cancha no encontrada");
+            throw new ResourceNotFoundException("Cancha no encontrada.");
         }
 
         Cancha cancha = canchaOptional.get();
@@ -97,15 +97,13 @@ public class CanchaService implements ICanchaService {
             cancha.getTurnos().forEach(turno -> {
                 turno.setDeleted(true);
                 turno.setEstado(TurnoState.BORRADO);
-                turno.getReservas().forEach(reserva -> {
-                    reserva.setDeleted(true);
-                });
+                turno.getReservas().forEach(reserva -> reserva.setDeleted(true));
             });
             canchaRepository.save(cancha);
         });
 
         if (canchaOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Cancha no encontrada");
+            throw new ResourceNotFoundException("Cancha no encontrada.");
         }
     }
 
@@ -117,7 +115,7 @@ public class CanchaService implements ICanchaService {
         List<Cancha> canchas = canchaRepository.findAll();
 
         if(canchas.isEmpty()){
-            throw new ResourceNotFoundException("No se encontraron canchas para listar");
+            throw new ResourceNotFoundException("No se encontraron canchas para listar.");
         }
 
         List<CanchaResponseDTO> canchaAvailableResponseDTOS = new ArrayList<>();
@@ -129,6 +127,4 @@ public class CanchaService implements ICanchaService {
 
         return canchaAvailableResponseDTOS;
     }
-
-
 }
