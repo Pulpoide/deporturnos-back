@@ -40,7 +40,7 @@ public class AuthService {
     public RegistrationResponseDTO signup(RegistrationRequestDTO request) {
         Optional<Usuario> usuarioOptional = userRepository.findByEmail(request.getEmail());
         if (usuarioOptional.isPresent()) {
-            throw new UserAlreadyExistsException("El usuario ya existe");
+            throw new UserAlreadyExistsException("El usuario ya existe.");
         }
 
         // Validación de email
@@ -48,7 +48,7 @@ public class AuthService {
         java.util.regex.Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(request.getEmail());
         if (!matcher.matches()) {
-            throw new InvalidEmailException("Correo electrónico no válido");
+            throw new InvalidEmailException("Correo electrónico no válido.");
         }
 
         // Validación de password
@@ -56,7 +56,7 @@ public class AuthService {
         java.util.regex.Pattern patternPass = Pattern.compile(regexPass);
         Matcher matcherPass = patternPass.matcher(request.getPassword());
         if (!matcherPass.matches()) {
-            throw new InvalidPasswordException("Contraseña no válida");
+            throw new InvalidPasswordException("Contraseña no válida.");
         }
 
         Usuario user = Usuario.builder()
@@ -118,7 +118,7 @@ public class AuthService {
         if (optionalUser.isPresent()) {
             Usuario user = optionalUser.get();
             if (user.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
-                throw new RuntimeException("Código de verificación expirado");
+                throw new RuntimeException("Código de verificación expirado.");
             }
             if (user.getVerificationCode().equals(input.getVerificationCode())) {
                 user.setActivada(true);
@@ -126,10 +126,10 @@ public class AuthService {
                 user.setVerificationCodeExpiresAt(null);
                 userRepository.save(user);
             } else {
-                throw new RuntimeException("Código de verificación no válido");
+                throw new RuntimeException("Código de verificación no válido.");
             }
         } else {
-            throw new RuntimeException("Usuario no encontrado");
+            throw new RuntimeException("Usuario no encontrado.");
         }
     }
 
@@ -138,26 +138,26 @@ public class AuthService {
         if (optionalUser.isPresent()) {
             Usuario user = optionalUser.get();
             if (user.isEnabled()) {
-                throw new RuntimeException("La cuenta ya está verificada");
+                throw new RuntimeException("La cuenta ya está verificada.");
             }
             user.setVerificationCode(generateVerificationCode());
             user.setVerificationCodeExpiresAt(LocalDateTime.now().plusHours(1));
             sendVerificationEmail(user);
             userRepository.save(user);
         } else {
-            throw new RuntimeException("Usuario no encontrado");
+            throw new RuntimeException("Usuario no encontrado.");
         }
     }
 
     public Usuario authenticate(LoginRequestDTO input) {
         Usuario user = userRepository.findByEmail(input.getEmail())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado."));
 
         if (!user.isActivada()) {
             throw new RuntimeException("Cuenta no verificada. Por favor verifique su cuenta.");
         }
         if(user.isDeleted()){
-            throw new RuntimeException("Usuario no encontrado");
+            throw new RuntimeException("Usuario no encontrado.");
         }
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -168,64 +168,4 @@ public class AuthService {
 
         return user;
     }
-
-
-    // Old Methods
-//    public LoginResponseDTO login(LoginRequestDTO loginRequestDTO) {
-//        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequestDTO.getEmail(), loginRequestDTO.getPassword()));
-//        Optional<Usuario> user = userRepository.findByEmail(loginRequestDTO.getEmail());
-//
-//        if(user.isEmpty()) {
-//            throw new ResourceNotFoundException("Usuario no encontrado");
-//        }
-//
-//        String token = jwtService.getToken(user.get());
-//
-//        return LoginResponseDTO.builder()
-//                .id(user.get().getId())
-//                .nombre(user.get().getNombre())
-//                .email(user.get().getEmail())
-//                .token(token)
-//                .build();
-//    }
-//
-//    public RegistrationResponseDTO register(RegistrationRequestDTO request) {
-//        Optional<Usuario> usuarioOptional = userRepository.findByEmail(request.getEmail());
-//       if (usuarioOptional.isPresent()) {
-//           throw new UserAlreadyExistsException("El usuario ya existe");
-//       }
-//
-//       // Validación de email
-//        String regex = "^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,}$";
-//        java.util.regex.Pattern pattern = Pattern.compile(regex);
-//        Matcher matcher = pattern.matcher(request.getEmail());
-//        if (!matcher.matches()) {
-//            throw new InvalidEmailException("Correo electrónico no válido");
-//        }
-//
-//        // Validación de password
-//        String regexPass = "^(?=\\w*\\d)(?=\\w*[a-z])\\S{8,16}$";
-//        java.util.regex.Pattern patternPass = Pattern.compile(regexPass);
-//        Matcher matcherPass = patternPass.matcher(request.getPassword());
-//        if (!matcherPass.matches()) {
-//            throw new InvalidPasswordException("Contraseña no válida");
-//        }
-//
-//        Usuario user = Usuario.builder()
-//                .nombre(request.getNombre())
-//                .password(passwordEncoder.encode(request.getPassword()))
-//                .email(request.getEmail())
-//                .telefono(request.getTelefono())
-//                .rol(Rol.CLIENTE)
-//                .activada(true)
-//                .build();
-//
-//        userRepository.save(user);
-//
-//        return RegistrationResponseDTO.builder()
-//                .nombre(user.getNombre())
-//                .email(user.getEmail())
-//                .build();
-//    }
-
 }

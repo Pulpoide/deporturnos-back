@@ -43,7 +43,7 @@ public class AuthController {
     public ResponseEntity<?> verifyUser(@RequestBody VerifyUserDTO verifyUserDto) {
         try {
             authService.verifyUser(verifyUserDto);
-            return ResponseEntity.ok("Cuenta verificada exitosamente");
+            return ResponseEntity.ok("Cuenta verificada exitosamente.");
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -53,7 +53,7 @@ public class AuthController {
     public ResponseEntity<?> resendVerificationCode(@RequestParam String email){
         try {
             authService.resendVerificationCode(email);
-            return ResponseEntity.ok("Código de verificación reenviado");
+            return ResponseEntity.ok("Código de verificación reenviado.");
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

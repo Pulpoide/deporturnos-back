@@ -27,6 +27,8 @@ public class UsuarioController {
     @Autowired
     private PasswordResetTokenService passwordResetTokenService;
 
+    // Endpoints para ROLE_ADMIN ♫
+
     // Endpoint para obtener todos los usuarios
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping
@@ -64,8 +66,7 @@ public class UsuarioController {
     }
 
 
-
-    // Endpoints para ROLE_CLIENTE o ROLE_ADMIN
+    // Endpoints para ROLE_CLIENTE
 
     // Actualizar Usuario
     @PreAuthorize("hasRole('ROLE_CLIENTE') or hasRole('ROLE_ADMIN')")
@@ -98,10 +99,7 @@ public class UsuarioController {
         if (!isValid) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token inválido o expirado.");
         }
-
         Usuario usuario = passwordResetTokenService.getUserByToken(token);
         return usuarioService.resetPassword(usuario.getId(), passwordResetRequestDTO);
     }
-
-
 }

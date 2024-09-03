@@ -50,7 +50,7 @@ public class TurnoController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") Long id) {
         turnoService.delete(id);
-        return ResponseEntity.ok(new GeneralResponseDTO("Turno eliminado correctamente"));
+        return ResponseEntity.ok(new GeneralResponseDTO("Turno eliminado correctamente."));
     }
 
 

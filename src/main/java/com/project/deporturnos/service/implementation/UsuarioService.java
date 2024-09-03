@@ -47,7 +47,7 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
         List<Usuario> usuarios = usuarioRepository.findAllByDeletedFalse();
 
         if(usuarios.isEmpty()){
-            throw new ResourceNotFoundException("No se encontraron usuarios para listar");
+            throw new ResourceNotFoundException("No se encontraron usuarios para listar.");
         }
 
         List<UsuarioResponseDTO> usuarioResponseDTOS = new ArrayList<>();
@@ -79,7 +79,7 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
             }
             usuarioRepository.save(usuario);
         }else{
-            throw new ResourceNotFoundException("Usuario no encontrado");
+            throw new ResourceNotFoundException("Usuario no encontrado.");
         }
     }
 
@@ -92,7 +92,7 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
     private UsuarioResponseDTO getUsuarioResponseDTO(Long id, UsuarioRequestUpdateDTO usuarioRequestUpdateDTO) {
         Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
         if(usuarioOptional.isEmpty()){
-            throw new ResourceNotFoundException("Usuario no encontrado");
+            throw new ResourceNotFoundException("Usuario no encontrado.");
         }
 
         Usuario usuario = usuarioOptional.get();
@@ -108,12 +108,12 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
             Pattern pattern = Pattern.compile(regex);
             Matcher matcher = pattern.matcher(usuarioRequestUpdateDTO.getEmail());
             if (!matcher.matches()) {
-                throw new InvalidEmailException("Correo electrónico no válido");
+                throw new InvalidEmailException("Correo electrónico no válido.");
             }
 
             Optional<Usuario> usuarioOptional2 = usuarioRepository.findByEmail(usuarioRequestUpdateDTO.getEmail());
             if(usuarioOptional2.isPresent()){
-                throw new UserAlreadyExistsException("Ya existe un usuario con ese email");
+                throw new UserAlreadyExistsException("Ya existe un usuario con ese email.");
             }
 
             usuario.setEmail(usuarioRequestUpdateDTO.getEmail());
@@ -126,7 +126,7 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
             Pattern patternPass = Pattern.compile(regexPass);
             Matcher matcherPass = patternPass.matcher(usuarioRequestUpdateDTO.getPassword());
             if (!matcherPass.matches()) {
-                throw new InvalidPasswordException("Contraseña no válida");
+                throw new InvalidPasswordException("Contraseña no válida.");
             }
 
             usuario.setPassword(passwordEncoder.encode(usuarioRequestUpdateDTO.getPassword()));
@@ -146,11 +146,11 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
         Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
 
         if(usuarioOptional.isEmpty()){
-            throw new ResourceNotFoundException("Usuario no encontrado");
+            throw new ResourceNotFoundException("Usuario no encontrado.");
         }
 
         if(id == 1){
-            throw new IllegalArgumentException("No es posible cambiarle el roll al administrador supremo");
+            throw new IllegalArgumentException("No es posible cambiarle el roll al administrador supremo.");
         }
 
         Usuario usuario = usuarioOptional.get();
@@ -170,7 +170,7 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
         Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
 
         if(usuarioOptional.isEmpty()){
-            throw new ResourceNotFoundException("Usuario no encontrado");
+            throw new ResourceNotFoundException("Usuario no encontrado.");
         }
 
         Usuario usuario = usuarioOptional.get();
@@ -187,7 +187,7 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
         Usuario currentUser = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if(currentUser.getRol().equals(Rol.CLIENTE)) {
             if (!Objects.equals(id, currentUser.getId())) {
-                throw new InsufficientAuthenticationException("No autorizado");
+                throw new InsufficientAuthenticationException("No autorizado.");
             }
         }
         return reservaRepository.findByUsuarioId(id);
@@ -199,7 +199,7 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
        Usuario currentUser = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if(currentUser.getRol().equals(Rol.CLIENTE)) {
             if (!id.equals(currentUser.getId())) {
-                throw new InsufficientAuthenticationException("No autorizado");
+                throw new InsufficientAuthenticationException("No autorizado.");
             }
         }
 
@@ -221,25 +221,25 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
         Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
 
         if(usuarioOptional.isEmpty()){
-            throw new ResourceNotFoundException("Usuario no encontrado");
+            throw new ResourceNotFoundException("Usuario no encontrado.");
         }
 
         Usuario usuario = usuarioOptional.get();
 
         // Verificación de la contraseña actual
         if(!passwordEncoder.matches(passwordChangeRequestDTO.getOldPassword(), usuario.getPassword())){
-            throw new InvalidPasswordException("Contraseña actual incorrecta");
+            throw new InvalidPasswordException("Contraseña actual incorrecta.");
         }
 
         // Validación y actualización de la nueva contraseña
         validateAndUpdatePassword(mapper.convertValue(passwordChangeRequestDTO, PasswordResetRequestDTO.class), usuario);
 
-        return ResponseEntity.ok(new ApiResponse(true, "Contraseña cambiada exitosamente"));
+        return ResponseEntity.ok(new ApiResponse(true, "Contraseña cambiada exitosamente."));
     }
 
     private void validateAndUpdatePassword(PasswordResetRequestDTO passwordResetRequestDTO, Usuario usuario) {
         if (!passwordResetRequestDTO.getNewPassword().equals(passwordResetRequestDTO.getConfirmNewPassword())) {
-            throw new InvalidPasswordException("La nueva contraseña y su confirmación no coinciden");
+            throw new InvalidPasswordException("La nueva contraseña y su confirmación no coinciden.");
         }
 
         // Validación de los requisitos de la nueva contraseña
@@ -248,7 +248,7 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
         Matcher matcherPass = patternPass.matcher(passwordResetRequestDTO.getNewPassword());
 
         if (!matcherPass.matches()) {
-            throw new InvalidPasswordException("La nueva contraseña no cumple con los requisitos de seguridad: Debe tener al menos un número y un caracter");
+            throw new InvalidPasswordException("La nueva contraseña no cumple con los requisitos de seguridad: Minimo ocho caracteres, al menos un número y una letra.");
         }
 
         usuario.setPassword(passwordEncoder.encode(passwordResetRequestDTO.getNewPassword()));
@@ -269,14 +269,14 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
             return usuario.get();
         }
 
-        throw new UsernameNotFoundException("User Not Found");
+        throw new UsernameNotFoundException("User Not Found.");
     }
 
     @Override
     public ResponseEntity<?> resetPassword(Long userId, PasswordResetRequestDTO passwordResetRequestDTO){
         Optional<Usuario> usuarioOptional = usuarioRepository.findById(userId);
         if(usuarioOptional.isEmpty()){
-            throw new ResourceNotFoundException("Usuario no encontrado");
+            throw new ResourceNotFoundException("Usuario no encontrado.");
         }
 
         Usuario usuario = usuarioOptional.get();
