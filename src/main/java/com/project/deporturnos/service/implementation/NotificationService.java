@@ -29,7 +29,7 @@ public class NotificationService implements INotificationService {
             throw new RuntimeException("Error al crear el directorio temporal para el QR", e);
         }
 
-        String qrFilePath = tempDirectory.toString() + "/codigoQR_" + user.getId() + ".png";
+        String qrFilePath = tempDirectory + "/codigoQR_" + user.getId() + ".png";
         System.out.println("Ruta del archivo QR: " + qrFilePath);
 
         try {
