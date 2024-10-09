@@ -16,7 +16,6 @@ import java.nio.file.Path;
 public class NotificationService implements INotificationService {
 
     private final EmailService emailService;
-    private final AuthService authService;
 
     public void sendNotificationReservationConfirmed(Usuario user) {
         String qrData = "www.google.com";
