@@ -13,8 +13,8 @@ import java.util.List;
 
 public class TurnoSpecification implements Specification<Turno> {
 
-    private LocalDate fechaDesde;
-    private LocalDate fechaHasta;
+    private final LocalDate fechaDesde;
+    private final LocalDate fechaHasta;
 
     public TurnoSpecification(LocalDate fechaDesde, LocalDate fechaHasta) {
         this.fechaDesde = fechaDesde;
