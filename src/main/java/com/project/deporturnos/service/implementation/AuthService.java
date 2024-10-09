@@ -33,9 +33,7 @@ public class AuthService {
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
-
     private final EmailService emailService;
-
 
     public RegistrationResponseDTO signup(RegistrationRequestDTO request) {
         Optional<Usuario> usuarioOptional = userRepository.findByEmail(request.getEmail());
@@ -85,7 +83,7 @@ public class AuthService {
                 .build();
     }
 
-    private String generateVerificationCode() {
+    public String generateVerificationCode() {
         Random random = new Random();
         int code = random.nextInt(900000) + 100000;
         return String.valueOf(code);
@@ -94,7 +92,7 @@ public class AuthService {
     private void sendVerificationEmail(Usuario user) {
         String subject = "Account Verification";
         String verificationCode = user.getVerificationCode();
-        String htmlMessage = "<html>"
+        String body = "<html>"
                 + "<body style=\"font-family: Arial, sans-serif;\">"
                 + "<div style=\"background-color: #f5f5f5; padding: 20px;\">"
                 + "<h2 style=\"color: #333;\">¡Bienvenido a DeporTurnos!</h2>"
@@ -107,7 +105,7 @@ public class AuthService {
                 + "</body>"
                 + "</html>";
         try {
-            emailService.sendEmail(user.getEmail(), subject, htmlMessage);
+            emailService.sendEmail(user.getEmail(), subject, body);
         } catch (MessagingException e) {
             throw new VerificationEmailException("Error al enviar código de verificación.");
         }

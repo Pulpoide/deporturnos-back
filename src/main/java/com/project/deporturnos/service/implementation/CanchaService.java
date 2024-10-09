@@ -9,7 +9,7 @@ import com.project.deporturnos.entity.dto.CanchaResponseDTO;
 import com.project.deporturnos.exception.ResourceNotFoundException;
 import com.project.deporturnos.repository.ICanchaRepository;
 import com.project.deporturnos.service.ICanchaService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -17,19 +17,16 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class CanchaService implements ICanchaService {
 
-    @Autowired
-    ICanchaRepository canchaRepository;
+    private final ICanchaRepository canchaRepository;
+    private final ObjectMapper mapper;
 
-    @Autowired
-    ObjectMapper mapper;
 
     @Override
     public CanchaResponseDTO save(CanchaRequestDTO canchaRequestDTO){
-
         Cancha cancha = mapper.convertValue(canchaRequestDTO, Cancha.class);
-
         cancha.setDisponibilidad(true);
 
         Cancha canchaSaved = canchaRepository.save(cancha);

@@ -1,12 +1,9 @@
 package com.project.deporturnos.controller;
 
-import com.project.deporturnos.entity.dto.GeneralResponseDTO;
-import com.project.deporturnos.entity.dto.TurnoRequestDTO;
-import com.project.deporturnos.entity.dto.TurnoRequestUpdateDTO;
-import com.project.deporturnos.entity.dto.TurnoResponseDTO;
+import com.project.deporturnos.entity.dto.*;
 import com.project.deporturnos.service.ITurnoService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,10 +15,10 @@ import java.util.List;
 @RestController
 @CrossOrigin
 @RequestMapping("/api/turnos")
+@RequiredArgsConstructor
 public class TurnoController {
 
-    @Autowired
-    ITurnoService turnoService;
+    private final ITurnoService turnoService;
 
 
     // Endpoint para obtener todos los turnos
@@ -53,6 +50,33 @@ public class TurnoController {
         return ResponseEntity.ok(new GeneralResponseDTO("Turno eliminado correctamente."));
     }
 
+    // Endpoint para cargar turnos masivamente
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping("/massive-charge")
+    public ResponseEntity<String> cargaMasivaTurnos(@RequestBody CargaMasivaTurnosDTO cargaMasivaTurnosDTO){
+        turnoService.cargaMasivaTurnos(cargaMasivaTurnosDTO);
+        return ResponseEntity.ok("Carga masiva de turnos completada con éxito.");
+    }
+
+    // Endpoint para mostrar turnos filtrados por fechaDesde || fechaHasta
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/filtrar")
+    public ResponseEntity<List<TurnoResponseDTO>> getTurnosByFecha(
+            @RequestParam(value = "fechaDesde", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaDesde,
+            @RequestParam(value = "fechaHasta", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaHasta) {
+
+        List<TurnoResponseDTO> turnosFiltrados;
+
+        if (fechaDesde == null && fechaHasta == null) {
+            turnosFiltrados = turnoService.getAll();
+        } else {
+            turnosFiltrados = turnoService.getTurnosEntreFechas(fechaDesde, fechaHasta);
+        }
+
+        return ResponseEntity.ok(turnosFiltrados);
+    }
+
+
 
     // Endpoints para ROLE_CLIENTE o ROLE_ADMIN
 
@@ -62,7 +86,5 @@ public class TurnoController {
     public ResponseEntity<List<TurnoResponseDTO>> getAllAvailableByCanchaAndDate(@PathVariable("id") Long id, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
         return ResponseEntity.ok(turnoService.getAllAvailableByCanchaAndDate(id, fecha));
     }
-
-
 
 }

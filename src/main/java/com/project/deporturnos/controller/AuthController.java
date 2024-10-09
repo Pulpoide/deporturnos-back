@@ -38,6 +38,7 @@ public class AuthController {
         RegistrationResponseDTO registrationResponseDTO =  authService.signup(registrationRequestDTO);
         return ResponseEntity.ok(registrationResponseDTO);
     }
+
     // Endpoint para verificar email de usuario
     @PostMapping("/verify")
     public ResponseEntity<?> verifyUser(@RequestBody VerifyUserDTO verifyUserDto) {
@@ -48,6 +49,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
     // Endpoint para reenviar código de verificación
     @PostMapping("/resend")
     public ResponseEntity<?> resendVerificationCode(@RequestParam String email){
@@ -58,6 +60,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
     // Endpoint para logear usuario
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginRequestDTO loginRequestDTO){
@@ -66,6 +69,7 @@ public class AuthController {
         LoginResponse loginResponse = new LoginResponse(jwtToken, jwtService.getJwtExpirationTime(), loginRequestDTO.getEmail(), authenticatedUser.getId(), authenticatedUser.getNombre(), authenticatedUser.getTelefono());
         return ResponseEntity.ok(loginResponse);
     }
+
     // Endpoint para solicitar restablecimiento de contraseña
     @PostMapping("/forgot-password")
     public ResponseEntity<String> forgotPassword(@RequestParam("email") String email){
