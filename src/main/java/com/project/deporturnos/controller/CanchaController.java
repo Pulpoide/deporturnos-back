@@ -1,9 +1,12 @@
 package com.project.deporturnos.controller;
 
-import com.project.deporturnos.entity.dto.*;
+import com.project.deporturnos.entity.dto.CanchaRequestDTO;
+import com.project.deporturnos.entity.dto.CanchaRequestUpdateDTO;
+import com.project.deporturnos.entity.dto.CanchaResponseDTO;
+import com.project.deporturnos.entity.dto.GeneralResponseDTO;
 import com.project.deporturnos.service.ICanchaService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -13,10 +16,10 @@ import java.util.List;
 @RestController
 @CrossOrigin
 @RequestMapping("/api/canchas")
+@RequiredArgsConstructor
 public class CanchaController {
 
-    @Autowired
-    ICanchaService canchaService;
+    private final ICanchaService canchaService;
 
 
     // Endpoint para obtener todas las canchas

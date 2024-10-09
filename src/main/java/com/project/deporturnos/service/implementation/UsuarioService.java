@@ -10,7 +10,7 @@ import com.project.deporturnos.exception.UserAlreadyExistsException;
 import com.project.deporturnos.repository.IReservaRepository;
 import com.project.deporturnos.repository.IUsuarioRepository;
 import com.project.deporturnos.service.IUsuarioService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,19 +28,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
+@RequiredArgsConstructor
 public class UsuarioService implements IUsuarioService, UserDetailsService {
 
-    @Autowired
-    private IUsuarioRepository usuarioRepository;
-
-    @Autowired
-    private IReservaRepository  reservaRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    ObjectMapper mapper;
+    private final IUsuarioRepository usuarioRepository;
+    private final IReservaRepository  reservaRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final ObjectMapper mapper;
 
     @Override
     public List<UsuarioResponseDTO> getAll(){
@@ -173,6 +167,10 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
             throw new ResourceNotFoundException("Usuario no encontrado.");
         }
 
+        if(id == 1){
+            throw new IllegalArgumentException("No es posible bloquear al administrador supremo.");
+        }
+
         Usuario usuario = usuarioOptional.get();
 
         usuario.setActivada(!usuarioOptional.get().isActivada());
@@ -213,7 +211,6 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
         Usuario usuarioSaved = usuarioRepository.save(currentUser);
 
         return mapper.convertValue(usuarioSaved, ProfileResUpdateDTO.class);
-
     }
 
     @Override

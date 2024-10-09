@@ -6,7 +6,7 @@ import com.project.deporturnos.entity.dto.*;
 import com.project.deporturnos.security.PasswordResetTokenService;
 import com.project.deporturnos.service.IUsuarioService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,15 +19,14 @@ import java.util.List;
 @RestController
 @CrossOrigin
 @RequestMapping("/api/usuarios")
+@RequiredArgsConstructor
 public class UsuarioController {
 
-    @Autowired
-    private IUsuarioService usuarioService;
+    private final IUsuarioService usuarioService;
+    private final PasswordResetTokenService passwordResetTokenService;
 
-    @Autowired
-    private PasswordResetTokenService passwordResetTokenService;
 
-    // Endpoints para ROLE_ADMIN ♫
+    // Endpoints para ROLE_ADMIN ♫:
 
     // Endpoint para obtener todos los usuarios
     @PreAuthorize("hasRole('ROLE_ADMIN')")

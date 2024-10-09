@@ -1,13 +1,9 @@
 package com.project.deporturnos.controller;
 
-import com.project.deporturnos.entity.dto.GeneralResponseDTO;
-import com.project.deporturnos.entity.dto.ReservaRequestDTO;
-import com.project.deporturnos.entity.dto.ReservaRequestUpdateDTO;
-import com.project.deporturnos.entity.dto.ReservaRequestUpdateByUserDTO;
-import com.project.deporturnos.entity.dto.ReservaResponseDTO;
+import com.project.deporturnos.entity.dto.*;
 import com.project.deporturnos.service.IReservaService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -18,10 +14,10 @@ import java.util.List;
 @RestController
 @CrossOrigin
 @RequestMapping("/api/reservas")
+@RequiredArgsConstructor
 public class ReservaController {
 
-    @Autowired
-    IReservaService reservaService;
+    private final IReservaService reservaService;
 
     // Endpoint para obtener todas las reservas
     @PreAuthorize("hasRole('ROLE_ADMIN')")

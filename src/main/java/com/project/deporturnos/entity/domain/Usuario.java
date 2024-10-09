@@ -55,11 +55,22 @@ public class Usuario implements UserDetails {
     private LocalDateTime verificationCodeExpiresAt;
 
     @Column
+    @Builder.Default
     private boolean deleted = Boolean.FALSE;
 
     @OneToMany(mappedBy = "usuario")
     @JsonIgnore
     private Set<Reserva> reservas;
+
+    public Usuario(Long id, String nombre, String email, String pass, String tel, Rol rol, boolean activate) {
+        this.id = id;
+        this.nombre = nombre;
+        this.email = email;
+        this.password = pass;
+        this.telefono = tel;
+        this.rol = rol;
+        this.activada = activate;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
