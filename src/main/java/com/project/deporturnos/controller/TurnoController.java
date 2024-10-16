@@ -54,8 +54,8 @@ public class TurnoController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/massive-charge")
     public ResponseEntity<String> cargaMasivaTurnos(@RequestBody CargaMasivaTurnosDTO cargaMasivaTurnosDTO){
-        turnoService.cargaMasivaTurnos(cargaMasivaTurnosDTO);
-        return ResponseEntity.ok("Carga masiva de turnos completada con éxito.");
+        int turnosCreados = turnoService.cargaMasivaTurnos(cargaMasivaTurnosDTO);
+        return ResponseEntity.ok(String.format("Carga masiva de turnos completada con éxito, se cargaron %d turnos.", turnosCreados));
     }
 
     // Endpoint para mostrar turnos filtrados por fechaDesde || fechaHasta

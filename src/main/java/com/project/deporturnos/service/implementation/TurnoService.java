@@ -174,11 +174,13 @@ public class TurnoService implements ITurnoService {
     }
 
     @Transactional
-    public void cargaMasivaTurnos(CargaMasivaTurnosDTO cargaMasivaTurnosDTO){
+    public int cargaMasivaTurnos(CargaMasivaTurnosDTO cargaMasivaTurnosDTO){
         LocalDate fechaActual = cargaMasivaTurnosDTO.getFechaDesde();
+        int turnosCreados = 0;
 
         Cancha cancha = canchaRepository.findById(cargaMasivaTurnosDTO.getCanchaId())
                 .orElseThrow(() -> new ResourceNotFoundException("Cancha no encontrada."));
+
         if(!cancha.isDisponibilidad()) {
             throw new CanchaNotAvailableException("Cancha no disponible.");
         }
@@ -203,6 +205,7 @@ public class TurnoService implements ITurnoService {
                     nuevoTurno.setCancha(cancha);
                     nuevoTurno.setDeleted(false);
 
+                    turnosCreados++;
                     turnoRepository.save(nuevoTurno);
                 }
 
@@ -211,6 +214,7 @@ public class TurnoService implements ITurnoService {
 
             fechaActual = fechaActual.plusDays(1);
         }
+        return turnosCreados;
     }
 
     public List<TurnoResponseDTO> getTurnosEntreFechas(LocalDate fechaDesde, LocalDate fechaHasta) {
