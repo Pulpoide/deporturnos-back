@@ -19,7 +19,7 @@ public interface ITurnoService {
 
     List<TurnoResponseDTO> getAllAvailableByCanchaAndDate(Long id, LocalDate fecha);
 
-    void cargaMasivaTurnos(CargaMasivaTurnosDTO cargaMasivaTurnosDTO);
+    int cargaMasivaTurnos(CargaMasivaTurnosDTO cargaMasivaTurnosDTO);
 
     List<TurnoResponseDTO> getTurnosEntreFechas(LocalDate fechaDesde, LocalDate fechaHasta);
 }

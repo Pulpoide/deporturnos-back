@@ -67,12 +67,4 @@ public class ReservaController {
         return ResponseEntity.ok(new GeneralResponseDTO("Reserva cancelada."));
     }
 
-    // Endpoint para modificar el turno de una reserva
-    @PreAuthorize("hasRole('ROLE_CLIENTE') or hasRole('ROLE_ADMIN')")
-    @PutMapping("/{id}/turno")
-    public ResponseEntity<ReservaResponseDTO> updateReservaByUser(@PathVariable("id") Long id, @Valid @RequestBody ReservaRequestUpdateByUserDTO reservaRequestUpdateByUserDTO) {
-        return ResponseEntity.ok(reservaService.updateReservaByUser(id, reservaRequestUpdateByUserDTO));
-    }
-
-
 }

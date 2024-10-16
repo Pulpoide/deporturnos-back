@@ -89,6 +89,7 @@ public class ReservaService implements IReservaService {
 
         //Manejo de estados
         if(reservaRequestUpdateDTO.getEstado() != null){
+
             ReservaState reservaState = reservaRequestUpdateDTO.getEstado();
             TurnoState turnoState = reserva.getTurno().getEstado();
 
@@ -102,6 +103,12 @@ public class ReservaService implements IReservaService {
                 }
 
                 reserva.getTurno().setEstado(TurnoState.RESERVADO);
+
+            } else if(reservaState.equals(ReservaState.COMPLETADA)){
+                // Termina la vida útil del Turno
+                if(turnoState.equals(TurnoState.RESERVADO)){
+                    reserva.getTurno().setEstado(TurnoState.BORRADO);
+                }
             }
 
             reserva.setEstado(reservaRequestUpdateDTO.getEstado());
@@ -114,10 +121,12 @@ public class ReservaService implements IReservaService {
             if(turno.getEstado().equals(TurnoState.RESERVADO)){
                 throw new TurnoAlreadyReservedException("Turno no disponible.");
             }
-            // Turno anterior de esa reserva
+            // El Turno anterior de esa reserva pasa a estar disponible
             reserva.getTurno().setEstado(TurnoState.DISPONIBLE);
 
+            // El nuevo Turno pasa a estar reservado
             turno.setEstado(TurnoState.RESERVADO);
+
             reserva.setTurno(turno);
         }
 
@@ -193,6 +202,7 @@ public class ReservaService implements IReservaService {
             }
 
             reserva.getTurno().setEstado(TurnoState.DISPONIBLE);
+            // Enviar email a usuarios notification=true ->
             reserva.setEstado(ReservaState.CANCELADA);
             reservaRepository.save(reserva);
         }else{

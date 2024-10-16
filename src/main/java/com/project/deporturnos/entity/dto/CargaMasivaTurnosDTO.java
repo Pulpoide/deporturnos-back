@@ -14,10 +14,15 @@ import java.time.LocalTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CargaMasivaTurnosDTO {
+    @NotNull
     private LocalDate fechaDesde;
+    @NotNull
     private LocalDate fechaHasta;
+    @NotNull
     private LocalTime horaDesde;
+    @NotNull
     private LocalTime horaHasta;
+    @NotNull
     private int duracionEnMinutos;
     @NotNull
     private Long canchaId;
