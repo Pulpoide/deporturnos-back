@@ -12,6 +12,7 @@ import com.project.deporturnos.exception.TurnoAlreadyReservedException;
 import com.project.deporturnos.repository.IReservaRepository;
 import com.project.deporturnos.repository.ITurnoRepository;
 import com.project.deporturnos.repository.IUsuarioRepository;
+import com.project.deporturnos.repository.ReservaSpecification;
 import com.project.deporturnos.service.IReservaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,11 +20,13 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -209,6 +212,28 @@ public class ReservaService implements IReservaService {
             throw new ResourceNotFoundException("Reserva no encontrada.");
         }
     }
+
+    public List<ReservaResponseDTO> getReservasEntreFechas(LocalDate fechaDesde, LocalDate fechaHasta) {
+        LocalDate fechaDesdeDate = (fechaDesde != null) ? Date.valueOf(fechaDesde).toLocalDate() : null;
+        LocalDate fechaHastaDate = (fechaHasta != null) ? Date.valueOf(fechaHasta).toLocalDate() : null;
+
+        // Especificación de la reserva
+        ReservaSpecification specification = new ReservaSpecification(fechaDesdeDate, fechaHastaDate);
+
+        // Buscamos las reservas usando la especificación
+        List<Reserva> reservas = reservaRepository.findAll(specification);
+
+        if(reservas.isEmpty()){
+            throw new ResourceNotFoundException("No se encontraron reservas para listar en el rango de fechas.");
+        }
+
+        return reservas.stream()
+                .map(reserva -> mapper.convertValue(reserva, ReservaResponseDTO.class))
+                .collect(Collectors.toList());
+    }
+
+
+
 
     @Override
     public ReservaResponseDTO updateReservaByUser(Long id, @Valid ReservaRequestUpdateByUserDTO reservaRequestUpdateByUserDTO) {

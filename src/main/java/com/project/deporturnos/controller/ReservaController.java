@@ -1,13 +1,18 @@
 package com.project.deporturnos.controller;
 
-import com.project.deporturnos.entity.dto.*;
+import com.project.deporturnos.entity.dto.GeneralResponseDTO;
+import com.project.deporturnos.entity.dto.ReservaRequestDTO;
+import com.project.deporturnos.entity.dto.ReservaRequestUpdateDTO;
+import com.project.deporturnos.entity.dto.ReservaResponseDTO;
 import com.project.deporturnos.service.IReservaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 
@@ -47,6 +52,25 @@ public class ReservaController {
         reservaService.delete(id);
         return ResponseEntity.ok(new GeneralResponseDTO("Reserva eliminada correctamente."));
     }
+
+    // Endpoint para mostrar reservas filtradas por fechaDesde || fechaHasta
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/filtrar")
+    public ResponseEntity<List<ReservaResponseDTO>> getReservasByFecha(
+            @RequestParam(value = "fechaDesde", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaDesde,
+            @RequestParam(value = "fechaHasta", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaHasta) {
+
+        List<ReservaResponseDTO> reservasFiltradas;
+
+        if (fechaDesde == null && fechaHasta == null) {
+            reservasFiltradas = reservaService.getAll();
+        } else {
+            reservasFiltradas = reservaService.getReservasEntreFechas(fechaDesde, fechaHasta);
+        }
+
+        return ResponseEntity.ok(reservasFiltradas);
+    }
+
 
 
 
