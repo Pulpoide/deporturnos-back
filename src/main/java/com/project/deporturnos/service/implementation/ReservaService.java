@@ -3,7 +3,6 @@ package com.project.deporturnos.service.implementation;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.deporturnos.entity.domain.*;
 import com.project.deporturnos.entity.dto.ReservaRequestDTO;
-import com.project.deporturnos.entity.dto.ReservaRequestUpdateByUserDTO;
 import com.project.deporturnos.entity.dto.ReservaRequestUpdateDTO;
 import com.project.deporturnos.entity.dto.ReservaResponseDTO;
 import com.project.deporturnos.exception.ReservaAlreadyCancelledException;
@@ -14,7 +13,6 @@ import com.project.deporturnos.repository.ITurnoRepository;
 import com.project.deporturnos.repository.IUsuarioRepository;
 import com.project.deporturnos.repository.ReservaSpecification;
 import com.project.deporturnos.service.IReservaService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -232,42 +230,4 @@ public class ReservaService implements IReservaService {
                 .collect(Collectors.toList());
     }
 
-
-
-
-    @Override
-    public ReservaResponseDTO updateReservaByUser(Long id, @Valid ReservaRequestUpdateByUserDTO reservaRequestUpdateByUserDTO) {
-        Optional<Reserva> reservaOptional = reservaRepository.findById(id);
-        Usuario currentUser = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-
-        Turno turno = turnoRepository.findById(reservaRequestUpdateByUserDTO.getTurnoId())
-                .orElseThrow(() -> new ResourceNotFoundException("Turno no encontrado."));
-
-        if(reservaOptional.isEmpty()){
-            throw new ResourceNotFoundException("Reserva no encontrada.");
-        }
-
-        Reserva reserva = reservaOptional.get();
-
-        if(currentUser.getRol().equals(Rol.CLIENTE)) {
-            if (!Objects.equals(reserva.getUsuario().getId(), currentUser.getId())) {
-                throw new InsufficientAuthenticationException("No autorizado.");
-            }
-        }
-
-        reserva.getTurno().setEstado(TurnoState.DISPONIBLE);
-
-        if(turno.getEstado().equals(TurnoState.RESERVADO)){
-            throw new TurnoAlreadyReservedException("Turno no disponible.");
-        }
-
-        reserva.setTurno(turno);
-        turno.setEstado(TurnoState.RESERVADO);
-        reserva.setFecha(LocalDate.now());
-        reserva.setEstado(ReservaState.MODIFICADA);
-
-        Reserva reservaUpdated = reservaRepository.save(reserva);
-        return mapper.convertValue(reservaUpdated, ReservaResponseDTO.class);
-    }
 }
