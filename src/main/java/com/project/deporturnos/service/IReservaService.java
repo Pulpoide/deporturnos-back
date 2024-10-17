@@ -1,12 +1,10 @@
 package com.project.deporturnos.service;
 
 import com.project.deporturnos.entity.dto.ReservaRequestDTO;
-import com.project.deporturnos.entity.dto.ReservaRequestUpdateByUserDTO;
 import com.project.deporturnos.entity.dto.ReservaRequestUpdateDTO;
 import com.project.deporturnos.entity.dto.ReservaResponseDTO;
 
-import jakarta.validation.Valid;
-
+import java.time.LocalDate;
 import java.util.List;
 
 public interface IReservaService {
@@ -22,5 +20,6 @@ public interface IReservaService {
 
     void cancel(Long id);
 
-    ReservaResponseDTO updateReservaByUser(Long id, @Valid ReservaRequestUpdateByUserDTO reservaRequestUpdateByUserDTO);
+    List<ReservaResponseDTO> getReservasEntreFechas(LocalDate fechaDesde, LocalDate fechaHasta);
+
 }

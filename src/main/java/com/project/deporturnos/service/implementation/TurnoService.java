@@ -221,7 +221,7 @@ public class TurnoService implements ITurnoService {
         LocalDate fechaDesdeDate = (fechaDesde != null) ? Date.valueOf(fechaDesde).toLocalDate() : null;
         LocalDate fechaHastaDate = (fechaHasta != null) ? Date.valueOf(fechaHasta).toLocalDate() : null;
 
-        // Creamos la especificación de filtro
+        // Creamos la especificación del filtro
         TurnoSpecification specification = new TurnoSpecification(fechaDesdeDate, fechaHastaDate);
 
         // Buscamos los turnos usando la especificación
