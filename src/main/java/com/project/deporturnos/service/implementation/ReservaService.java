@@ -6,6 +6,7 @@ import com.project.deporturnos.entity.dto.ReservaRequestDTO;
 import com.project.deporturnos.entity.dto.ReservaRequestUpdateDTO;
 import com.project.deporturnos.entity.dto.ReservaResponseDTO;
 import com.project.deporturnos.exception.ReservaAlreadyCancelledException;
+import com.project.deporturnos.exception.ReservaAlreadyInProcessException;
 import com.project.deporturnos.exception.ResourceNotFoundException;
 import com.project.deporturnos.exception.TurnoAlreadyReservedException;
 import com.project.deporturnos.repository.IReservaRepository;
@@ -178,9 +179,11 @@ public class ReservaService implements IReservaService {
         reserva.setEstado(ReservaState.CONFIRMADA);
         reserva.setFecha(LocalDate.now());
 
-        notificationService.sendNotificationReservationConfirmed(currentUser);
 
         Reserva reservaSaved = reservaRepository.save(reserva);
+
+        notificationService.sendNotificationReservationConfirmed(currentUser, reservaSaved.getId());
+
         return mapper.convertValue(reservaSaved, ReservaResponseDTO.class);
     }
 
@@ -190,22 +193,31 @@ public class ReservaService implements IReservaService {
         Usuario currentUser = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         if(reservaOptional.isPresent()){
-            Reserva reserva = reservaOptional.get();
+            Reserva reservaCancel = reservaOptional.get();
+            Turno turno = reservaCancel.getTurno();
+            LocalDate now = LocalDate.now();
 
-            if(reserva.getEstado().equals(ReservaState.CANCELADA)){
+            if(reservaCancel.getEstado().equals(ReservaState.CANCELADA)){
                 throw new ReservaAlreadyCancelledException("La reserva ya se encuentra cancelada.");
             }
 
             if(currentUser.getRol().equals(Rol.CLIENTE)) {
-                if (!Objects.equals(reserva.getUsuario().getId(), currentUser.getId())) {
+                if (!Objects.equals(reservaCancel.getUsuario().getId(), currentUser.getId())) {
                     throw new InsufficientAuthenticationException("No autorizado.");
                 }
             }
 
-            reserva.getTurno().setEstado(TurnoState.DISPONIBLE);
-            // Enviar email a usuarios notification=true ->
-            reserva.setEstado(ReservaState.CANCELADA);
-            reservaRepository.save(reserva);
+            turno.setEstado(TurnoState.DISPONIBLE);
+
+            if(Objects.equals(turno.getFecha(), now) || Objects.equals(turno.getFecha(), now.minusDays(1))){
+                List<Usuario> usuariosANotificar = usuarioRepository.findByDeletedFalseAndRolAndNotificacionesTrue(Rol.CLIENTE);
+
+                // Enviar email a usuarios notification=true ->
+                notificationService.notifyUsersAboutPromotions(usuariosANotificar, turno, reservaCancel.getUsuario());
+            }
+
+            reservaCancel.setEstado(ReservaState.CANCELADA);
+            reservaRepository.save(reservaCancel);
         }else{
             throw new ResourceNotFoundException("Reserva no encontrada.");
         }
@@ -222,7 +234,7 @@ public class ReservaService implements IReservaService {
         List<Reserva> reservas = reservaRepository.findAll(specification);
 
         if(reservas.isEmpty()){
-            throw new ResourceNotFoundException("No se encontraron reservas para listar en el rango de fechas.");
+            throw new ResourceNotFoundException("No se encontraron reservas para listar en el rango de fechas proporcionado.");
         }
 
         return reservas.stream()
@@ -230,4 +242,36 @@ public class ReservaService implements IReservaService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public ReservaResponseDTO getById(Long id) {
+        Optional<Reserva> reservaOptional = reservaRepository.findById(id);
+        if(reservaOptional.isEmpty() || reservaOptional.get().isDeleted()){
+            throw new ResourceNotFoundException("Reserva no encontrada.");
+        }
+        return mapper.convertValue(reservaOptional, ReservaResponseDTO.class);
+    }
+
+    @Override
+    public void empezarReserva(Long reservaId) {
+        Optional<Reserva> reservaOptional = reservaRepository.findById(reservaId);
+
+        if(reservaOptional.isEmpty() || reservaOptional.get().isDeleted()){
+            throw new ResourceNotFoundException("Reserva no encontrada.");
+        }
+
+        if(reservaOptional.get().getEstado().equals(ReservaState.CANCELADA)){
+            throw new ReservaAlreadyCancelledException("La reserva se encuentra cancelada. No se puede iniciar una reserva cancelada.");
+        }
+
+        if(reservaOptional.get().getEstado().equals(ReservaState.EN_PROCESO)){
+            throw new ReservaAlreadyInProcessException("La reserva ya se encuentra en proceso.");
+        }
+
+        if(reservaOptional.get().getEstado().equals(ReservaState.COMPLETADA)){
+            throw new ReservaAlreadyInProcessException("La reserva ya se encuentra completada.");
+        }
+
+        reservaOptional.get().setEstado(ReservaState.EN_PROCESO);
+        reservaRepository.save(reservaOptional.get());
+    }
 }

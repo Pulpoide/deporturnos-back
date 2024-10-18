@@ -1,6 +1,7 @@
 package com.project.deporturnos.repository;
 
 import com.project.deporturnos.entity.domain.Reserva;
+import com.project.deporturnos.entity.domain.ReservaState;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -13,7 +14,11 @@ import java.util.List;
 @Repository
 public interface IReservaRepository extends JpaRepository<Reserva, Long>, JpaSpecificationExecutor<Reserva> {
 
-    List<Reserva> findByUsuarioId(Long id);
+    List<Reserva> findByUsuarioIdAndEstadoNotAndDeletedFalse(Long id, ReservaState state);
+
+    List<Reserva> findByUsuarioIdAndDeletedFalse(Long id);
+
+    List<Reserva> findByEstado(ReservaState state);
 
     @Query("SELECT r FROM Reserva r WHERE r.deleted = false")
     List<Reserva> findAllByDeletedFalse();

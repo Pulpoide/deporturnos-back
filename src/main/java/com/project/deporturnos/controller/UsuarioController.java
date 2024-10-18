@@ -77,8 +77,8 @@ public class UsuarioController {
     // Listar Reservas de Usuario
     @PreAuthorize("hasRole('ROLE_CLIENTE') or hasRole('ROLE_ADMIN')")
     @GetMapping("/{id}/reservas")
-    public ResponseEntity<List<Reserva>> getUserReservations(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(usuarioService.findReservationsByUserId(id));
+    public ResponseEntity<List<Reserva>> getUserReservations(@PathVariable("id") Long id, @RequestParam(value = "includeCompleted", required = false, defaultValue = "false") boolean includeCompleted) {
+        return ResponseEntity.ok(usuarioService.findReservationsByUserId(id, includeCompleted));
     }
 
     // Cambiar Contraseña
