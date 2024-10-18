@@ -1,5 +1,6 @@
 package com.project.deporturnos.repository;
 
+import com.project.deporturnos.entity.domain.Rol;
 import com.project.deporturnos.entity.domain.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,9 +18,9 @@ import java.util.Optional;
 
     Optional<Usuario> findByEmail(String email);
 
-    boolean existsByEmail(String email);
+   List<Usuario> findByDeletedFalseAndRolAndNotificacionesTrue(Rol rol);
 
-    @Query("SELECT u FROM Usuario u WHERE u.deleted = false")
+   @Query("SELECT u FROM Usuario u WHERE u.deleted = false")
     List<Usuario> findAllByDeletedFalse();
 
     Optional<Usuario> findByVerificationCode(String verificationCode);

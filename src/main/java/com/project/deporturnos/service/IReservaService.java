@@ -22,4 +22,7 @@ public interface IReservaService {
 
     List<ReservaResponseDTO> getReservasEntreFechas(LocalDate fechaDesde, LocalDate fechaHasta);
 
+    ReservaResponseDTO getById(Long id);
+
+    void empezarReserva(Long reservaId);
 }

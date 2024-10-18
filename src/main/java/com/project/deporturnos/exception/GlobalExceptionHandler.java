@@ -73,6 +73,11 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(new GeneralResponseDTO(ex.getMessage()),HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(ReservaAlreadyInProcessException.class)
+    public ResponseEntity<GeneralResponseDTO> handlerReservaAlreadyInProcessException(ReservaAlreadyInProcessException ex){
+        return new ResponseEntity<>(new GeneralResponseDTO(ex.getMessage()),HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(CanchaNotAvailableException.class)
     public ResponseEntity<GeneralResponseDTO> handlerCanchaNotAvailableException(CanchaNotAvailableException ex)
     {

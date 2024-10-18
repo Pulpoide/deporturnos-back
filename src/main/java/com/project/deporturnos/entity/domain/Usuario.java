@@ -58,6 +58,10 @@ public class Usuario implements UserDetails {
     @Builder.Default
     private boolean deleted = Boolean.FALSE;
 
+    @Column(name = "notificaciones", nullable = false)
+    @Builder.Default
+    private boolean notificaciones = Boolean.FALSE;
+
     @OneToMany(mappedBy = "usuario")
     @JsonIgnore
     private Set<Reserva> reservas;

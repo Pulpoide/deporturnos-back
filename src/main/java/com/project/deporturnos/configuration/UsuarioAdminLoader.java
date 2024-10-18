@@ -25,6 +25,7 @@ public class UsuarioAdminLoader implements ApplicationRunner {
                 .password(passwordEncoder.encode("password123/*"))
                 .rol(Rol.ADMIN)
                 .activada(true)
+                .notificaciones(false)
                 .build();
 
         if(usuarioRepository.findByEmail(usuario.getEmail()).isEmpty()){

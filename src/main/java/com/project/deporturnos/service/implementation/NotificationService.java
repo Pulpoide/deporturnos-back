@@ -1,5 +1,6 @@
 package com.project.deporturnos.service.implementation;
 
+import com.project.deporturnos.entity.domain.Turno;
 import com.project.deporturnos.entity.domain.Usuario;
 import com.project.deporturnos.service.INotificationService;
 import com.project.deporturnos.utils.QRCodeGenerator;
@@ -10,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -17,8 +19,8 @@ public class NotificationService implements INotificationService {
 
     private final EmailService emailService;
 
-    public void sendNotificationReservationConfirmed(Usuario user) {
-        String qrData = "www.google.com";
+    public void sendNotificationReservationConfirmed(Usuario user, Long reservaId) {
+        String qrData = "http://localhost:5173/validate-reserva/" + reservaId;
 
         Path tempDirectory = null;
         try {
@@ -61,6 +63,39 @@ public class NotificationService implements INotificationService {
 
         } catch (Exception e) {
             throw new RuntimeException("Error al generar o enviar el código QR", e);
+        }
+    }
+
+    public void notifyUsersAboutPromotions(List<Usuario> usuariosANotificar, Turno turno, Usuario usuarioQueCancela){
+        String subject = "Turno disponible en promoción ⚽";
+
+        String body = "<html>"
+                + "<body style=\"font-family: Arial, sans-serif;\">"
+                + "<div style=\"background-color: #f5f5f5; padding: 20px;\">"
+                + "<h2 style=\"color: #333;\">¡Turno disponible!</h2>"
+                + "<p style=\"font-size: 16px;\">Se ha liberado un turno en la cancha: " + turno.getCancha().getNombre() + ".</p>"
+                + "<p style=\"font-size: 16px;\">Fecha: " + turno.getFecha() + "</p>"
+                + "<p style=\"font-size: 16px;\">Hora de inicio: " + turno.getHoraInicio() + "</p>"
+                + "<p style=\"font-size: 16px;\">Hora de fin: " + turno.getHoraFin() + "</p>"
+                + "<p style=\"font-size: 16px;\">¡Aprovecha el descuento especial por cancelación!</p>"
+                + "</div>"
+                + "</body>"
+                + "</html>";
+
+        // Excluimos al usuario que realizó la cancelación
+        List<Usuario> usuariosFiltrados = usuariosANotificar.stream()
+                .filter(u -> !u.getId().equals(usuarioQueCancela.getId()))
+                .toList();
+
+        // Iteramos sobre los usuarios a notificar
+        for (Usuario usuario : usuariosFiltrados) {
+            try {
+                emailService.sendEmail(usuario.getEmail(), subject, body);
+                System.out.println("Notificación enviada a: " + usuario.getEmail());
+            } catch (Exception e) {
+                System.err.println("Error al enviar notificación a: " + usuario.getEmail());
+                e.printStackTrace();
+            }
         }
     }
 }

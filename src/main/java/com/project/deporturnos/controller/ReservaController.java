@@ -31,6 +31,13 @@ public class ReservaController {
         return ResponseEntity.ok(reservaService.getAll());
     }
 
+    // Endpoint para obtener una única reserva por su ID
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/{id}")
+    public ResponseEntity<ReservaResponseDTO> getById(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(reservaService.getById(id));
+    }
+
     // Endpoint para Registrar Reserva
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping
@@ -71,6 +78,13 @@ public class ReservaController {
         return ResponseEntity.ok(reservasFiltradas);
     }
 
+    // Endpoint para "empezar" la reserva, cambiandola a estado "EN_PROCESO"
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PutMapping("/{id}/empezar")
+    public ResponseEntity<String> empezarReserva(@PathVariable Long id) {
+        reservaService.empezarReserva(id);
+        return ResponseEntity.ok("Reserva iniciada exitosamente.");
+    }
 
 
 

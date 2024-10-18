@@ -21,7 +21,7 @@ public interface IUsuarioService {
 
     LockUnlockResponseDTO lockUnlock(Long id);
 
-    List<Reserva> findReservationsByUserId(Long id);
+    List<Reserva> findReservationsByUserId(Long id, boolean includeCompleted);
 
     ProfileResUpdateDTO updateProfile(Long id, @Valid ProfileReqUpdateDTO profileReqUpdateDTO);
 

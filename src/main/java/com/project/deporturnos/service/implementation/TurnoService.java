@@ -228,7 +228,7 @@ public class TurnoService implements ITurnoService {
         List<Turno> turnos = turnoRepository.findAll(specification);
 
         if (turnos.isEmpty()) {
-            throw new ResourceNotFoundException("No se encontraron turnos para listar en el rango de fechas.");
+            throw new ResourceNotFoundException("No se encontraron turnos para listar en el rango de fechas proporcionado.");
         }
 
         return turnos.stream()

@@ -180,7 +180,7 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
     }
 
     @Override
-    public List<Reserva> findReservationsByUserId(Long id) {
+    public List<Reserva> findReservationsByUserId(Long id, boolean includeCompleted) {
         // Get current user from SecurityContext
         Usuario currentUser = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if(currentUser.getRol().equals(Rol.CLIENTE)) {
@@ -188,7 +188,11 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
                 throw new InsufficientAuthenticationException("No autorizado.");
             }
         }
-        return reservaRepository.findByUsuarioId(id);
+        if(includeCompleted){
+            return reservaRepository.findByUsuarioIdAndDeletedFalse(id);
+        }else{
+            return reservaRepository.findByUsuarioIdAndEstadoNotAndDeletedFalse(id, ReservaState.COMPLETADA);
+        }
     }
 
     @Override
