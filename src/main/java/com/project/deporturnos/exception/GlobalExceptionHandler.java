@@ -78,6 +78,16 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(new GeneralResponseDTO(ex.getMessage()),HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(ReservaAlreadyCompletedException.class)
+    public ResponseEntity<GeneralResponseDTO> handlerReservaAlreadyCompletedException(ReservaAlreadyCompletedException ex){
+        return new ResponseEntity<>(new GeneralResponseDTO(ex.getMessage()),HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(InvalidReservaDateException.class)
+    public ResponseEntity<GeneralResponseDTO> handlerInvalidReservaDateException(InvalidReservaDateException ex){
+        return new ResponseEntity<>(new GeneralResponseDTO(ex.getMessage()),HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(CanchaNotAvailableException.class)
     public ResponseEntity<GeneralResponseDTO> handlerCanchaNotAvailableException(CanchaNotAvailableException ex)
     {

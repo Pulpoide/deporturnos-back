@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
 
+import java.math.BigDecimal;
 import java.util.Set;
 
 
@@ -26,7 +27,7 @@ public class Cancha {
     private String tipo;
 
     @Column(nullable = false)
-    private double precioHora;
+    private BigDecimal precioHora;
 
     @Column(nullable = false)
     private boolean disponibilidad;
