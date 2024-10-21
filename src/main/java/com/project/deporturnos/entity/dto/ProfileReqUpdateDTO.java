@@ -15,4 +15,6 @@ public class ProfileReqUpdateDTO {
     private String nombre;
     @Nullable
     private String telefono;
+    @Nullable
+    private boolean notificaciones;
 }

@@ -212,6 +212,8 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
             currentUser.setTelefono(profileReqUpdateDTO.getTelefono());
         }
 
+        currentUser.setNotificaciones(profileReqUpdateDTO.isNotificaciones());
+
         Usuario usuarioSaved = usuarioRepository.save(currentUser);
 
         return mapper.convertValue(usuarioSaved, ProfileResUpdateDTO.class);
