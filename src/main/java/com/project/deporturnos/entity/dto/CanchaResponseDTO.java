@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Setter
 @Getter
 @AllArgsConstructor
@@ -18,7 +20,7 @@ public class CanchaResponseDTO {
 
     private String tipo;
 
-    private double precioHora;
+    private BigDecimal precioHora;
 
     private boolean disponibilidad;
 

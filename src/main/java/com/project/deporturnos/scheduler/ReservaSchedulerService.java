@@ -2,6 +2,7 @@ package com.project.deporturnos.scheduler;
 
 import com.project.deporturnos.entity.domain.Reserva;
 import com.project.deporturnos.entity.domain.ReservaState;
+import com.project.deporturnos.entity.domain.TurnoState;
 import com.project.deporturnos.repository.IReservaRepository;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,8 @@ public class ReservaSchedulerService {
         for (Reserva reserva : reservasEnProceso) {
             if (reserva.getTurno().getHoraFin().isBefore(ahora)) {
                 reserva.setEstado(ReservaState.COMPLETADA);
-                reserva.getTurno().setDeleted(true);
+
+                reserva.getTurno().setEstado(TurnoState.COMPLETADO);
                 reservaRepository.save(reserva);
             }
         }

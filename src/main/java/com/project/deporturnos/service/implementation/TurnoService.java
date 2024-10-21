@@ -142,6 +142,7 @@ public class TurnoService implements ITurnoService {
         turnoOptional.ifPresent(turno -> {
             turno.setDeleted(true);
             turno.getReservas().forEach(reserva -> reserva.setDeleted(true));
+            turno.setEstado(TurnoState.BORRADO);
             turnoRepository.save(turno);
         });
 

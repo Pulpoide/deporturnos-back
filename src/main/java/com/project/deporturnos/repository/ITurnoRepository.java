@@ -2,6 +2,7 @@ package com.project.deporturnos.repository;
 
 import com.project.deporturnos.entity.domain.Cancha;
 import com.project.deporturnos.entity.domain.Turno;
+import com.project.deporturnos.entity.domain.TurnoState;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -20,4 +21,6 @@ public interface ITurnoRepository extends JpaRepository<Turno, Long>, JpaSpecifi
     List<Turno> findAllByDeletedFalse();
 
     boolean existsByCanchaAndFechaAndHoraInicio(Cancha cancha, LocalDate fecha, LocalTime horaInicio);
+
+    List<Turno> findAllByEstadoAndDeletedFalseAndFechaBetween(TurnoState estado, LocalDate fechaDesde, LocalDate fechaHasta);
 }
