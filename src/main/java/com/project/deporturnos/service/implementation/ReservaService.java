@@ -5,10 +5,7 @@ import com.project.deporturnos.entity.domain.*;
 import com.project.deporturnos.entity.dto.ReservaRequestDTO;
 import com.project.deporturnos.entity.dto.ReservaRequestUpdateDTO;
 import com.project.deporturnos.entity.dto.ReservaResponseDTO;
-import com.project.deporturnos.exception.ReservaAlreadyCancelledException;
-import com.project.deporturnos.exception.ReservaAlreadyInProcessException;
-import com.project.deporturnos.exception.ResourceNotFoundException;
-import com.project.deporturnos.exception.TurnoAlreadyReservedException;
+import com.project.deporturnos.exception.*;
 import com.project.deporturnos.repository.IReservaRepository;
 import com.project.deporturnos.repository.ITurnoRepository;
 import com.project.deporturnos.repository.IUsuarioRepository;
@@ -268,7 +265,11 @@ public class ReservaService implements IReservaService {
         }
 
         if(reservaOptional.get().getEstado().equals(ReservaState.COMPLETADA)){
-            throw new ReservaAlreadyInProcessException("La reserva ya se encuentra completada.");
+            throw new ReservaAlreadyCompletedException("La reserva ya se encuentra completada.");
+        }
+
+        if(!Objects.equals(reservaOptional.get().getFecha(), LocalDate.now())){
+            throw new InvalidReservaDateException("La fecha de la reserva no coincide con la fecha de hoy.");
         }
 
         reservaOptional.get().setEstado(ReservaState.EN_PROCESO);
