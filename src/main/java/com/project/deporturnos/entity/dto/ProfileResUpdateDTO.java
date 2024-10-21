@@ -12,4 +12,5 @@ import lombok.Setter;
 public class ProfileResUpdateDTO {
     private String nombre;
     private String telefono;
+    private boolean notificaciones;
 }
