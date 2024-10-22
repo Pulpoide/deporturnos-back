@@ -19,4 +19,6 @@ public class LoginResponse {
     private String nombre;
 
     private String telefono;
+
+    private Boolean notificaciones;
 }
