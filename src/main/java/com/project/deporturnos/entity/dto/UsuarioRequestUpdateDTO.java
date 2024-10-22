@@ -20,4 +20,6 @@ public class UsuarioRequestUpdateDTO {
     private String password;
     @Nullable
     private String telefono;
+    @Nullable
+    private Boolean notificaciones;
 }

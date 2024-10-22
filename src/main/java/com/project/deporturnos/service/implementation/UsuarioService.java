@@ -130,6 +130,10 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
             usuario.setTelefono(usuarioRequestUpdateDTO.getTelefono());
         }
 
+        if (usuarioRequestUpdateDTO.getNotificaciones() != null) {
+            usuario.setNotificaciones(usuarioRequestUpdateDTO.getNotificaciones());
+        }
+
         Usuario usuarioSaved = usuarioRepository.save(usuario);
         return mapper.convertValue(usuarioSaved, UsuarioResponseDTO.class);
     }

@@ -26,6 +26,8 @@ public class UsuarioResponseDTO {
 
     private boolean activada;
 
+    private boolean notificaciones;
+
     public UsuarioResponseDTO(Long id, String nombre, String email, String password) {
         this.id = id;
         this.nombre = nombre;
