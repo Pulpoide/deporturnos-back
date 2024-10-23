@@ -104,9 +104,8 @@ public class ReservaService implements IReservaService {
                 reserva.getTurno().setEstado(TurnoState.RESERVADO);
 
             } else if(reservaState.equals(ReservaState.COMPLETADA)){
-                // Termina la vida útil del Turno
                 if(turnoState.equals(TurnoState.RESERVADO)){
-                    reserva.getTurno().setEstado(TurnoState.BORRADO);
+                    reserva.getTurno().setEstado(TurnoState.COMPLETADO);
                 }
             }
 
@@ -206,11 +205,11 @@ public class ReservaService implements IReservaService {
 
             turno.setEstado(TurnoState.DISPONIBLE);
 
-            if(Objects.equals(turno.getFecha(), now) || Objects.equals(turno.getFecha(), now.minusDays(1))){
-                List<Usuario> usuariosANotificar = usuarioRepository.findByDeletedFalseAndRolAndNotificacionesTrue(Rol.CLIENTE);
+            if(Objects.equals(turno.getFecha(), now) || Objects.equals(turno.getFecha(), now.plusDays(1))){
+                //List<Usuario> usuariosANotificar = usuarioRepository.findByDeletedFalseAndRolAndNotificacionesTrue(Rol.CLIENTE);
 
                 // Enviar email a usuarios notification=true ->
-                notificationService.notifyUsersAboutPromotions(usuariosANotificar, turno, reservaCancel.getUsuario());
+                //notificationService.notifyUsersAboutPromotions(usuariosANotificar, turno, reservaCancel.getUsuario());
             }
 
             reservaCancel.setEstado(ReservaState.CANCELADA);
