@@ -69,15 +69,17 @@ public class NotificationService implements INotificationService {
     public void notifyUsersAboutPromotions(List<Usuario> usuariosANotificar, Turno turno, Usuario usuarioQueCancela){
         String subject = "Turno disponible en promoción ⚽";
 
+        String url = "http://localhost:5173/turnos-disponibles/" + turno.getCancha().getId();
+
         String body = "<html>"
                 + "<body style=\"font-family: Arial, sans-serif;\">"
                 + "<div style=\"background-color: #f5f5f5; padding: 20px;\">"
-                + "<h2 style=\"color: #333;\">¡Turno disponible!</h2>"
-                + "<p style=\"font-size: 16px;\">Se ha liberado un turno en la cancha: " + turno.getCancha().getNombre() + ".</p>"
+                + "<h2 style=\"color: #333;\">¡Turno " + turno.getId() + " disponible!</h2>"                + "<p style=\"font-size: 16px;\">Se ha liberado un turno en la cancha: " + turno.getCancha().getNombre() + ".</p>"
                 + "<p style=\"font-size: 16px;\">Fecha: " + turno.getFecha() + "</p>"
                 + "<p style=\"font-size: 16px;\">Hora de inicio: " + turno.getHoraInicio() + "</p>"
                 + "<p style=\"font-size: 16px;\">Hora de fin: " + turno.getHoraFin() + "</p>"
                 + "<p style=\"font-size: 16px;\">¡Aprovecha el descuento especial por cancelación!</p>"
+                + "<a href=\"" + url + "\" style=\"display: inline-block; background-color: #4CAF50; color: white; padding: 10px 20px; text-align: center; text-decoration: none; font-size: 16px; border-radius: 5px;\">Ver turno disponible</a>"
                 + "</div>"
                 + "</body>"
                 + "</html>";
