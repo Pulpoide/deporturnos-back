@@ -48,7 +48,7 @@ public class NotificationService implements INotificationService {
                     + "<body style=\"font-family: Arial, sans-serif;\">"
                     + "<div style=\"background-color: #f5f5f5; padding: 20px;\">"
                     + "<h2 style=\"color: #333;\">¡Gracias por reservar tu cancha con DeporTurnos!</h2>"
-                    + "<p style=\"font-size: 16px;\">Muestre el siguiente código de reserva al canchero para acceder a la cancha.</p>"
+                    + "<p style=\"font-size: 16px;\">Muestre el siguiente código QR al canchero para acceder a la cancha.</p>"
                     + "</div>"
                     + "</body>"
                     + "</html>";
