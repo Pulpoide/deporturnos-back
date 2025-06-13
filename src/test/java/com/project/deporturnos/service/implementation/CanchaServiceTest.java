@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import java.math.BigDecimal;
 
 import java.util.*;
 
@@ -34,12 +35,14 @@ class CanchaServiceTest {
     /* Metodo save() */
     @Test
     void save_Success() {
-        CanchaRequestDTO canchaRequestDTO = new CanchaRequestDTO("Cancha 1", "Fútbol 11", 1500, true, "Descripción", Deporte.FUTBOL);
+        BigDecimal precioHora = new BigDecimal(1500);
+
+        CanchaRequestDTO canchaRequestDTO = new CanchaRequestDTO("Cancha 1", "Fútbol 11", precioHora, true, "Descripción", Deporte.FUTBOL);
 
         Cancha cancha = new Cancha();
         cancha.setNombre("Cancha 1");
         cancha.setTipo("Fútbol 11");
-        cancha.setPrecioHora(1500);
+        cancha.setPrecioHora(precioHora);
         cancha.setDisponibilidad(true);
 
         CanchaResponseDTO expectedResponse = new CanchaResponseDTO();
@@ -120,20 +123,22 @@ class CanchaServiceTest {
     @Test
     void update_Success() {
         Long canchaId = 1L;
+        BigDecimal precioHora = new BigDecimal(2000);
 
         CanchaRequestUpdateDTO canchaRequestUpdateDTO = new CanchaRequestUpdateDTO();
         canchaRequestUpdateDTO.setNombre("Cancha Actualizada");
         canchaRequestUpdateDTO.setTipo("Fútbol 11");
-        canchaRequestUpdateDTO.setPrecioHora(2000);
+        canchaRequestUpdateDTO.setPrecioHora(precioHora);
         canchaRequestUpdateDTO.setDisponibilidad(true);
         canchaRequestUpdateDTO.setDeporte(Deporte.FUTBOL);
         canchaRequestUpdateDTO.setDescripcion("Descripción Actualizada");
 
+        BigDecimal precioHoraOld = new BigDecimal(1500);
         Cancha existingCancha = new Cancha();
         existingCancha.setId(canchaId);
         existingCancha.setNombre("Cancha Antigua");
         existingCancha.setTipo("Fútbol 5");
-        existingCancha.setPrecioHora(1500);
+        existingCancha.setPrecioHora(precioHoraOld);
         existingCancha.setDisponibilidad(false);
         existingCancha.setDeporte(Deporte.FUTBOL);
         existingCancha.setDescripcion("Descripción antigua");
@@ -142,7 +147,7 @@ class CanchaServiceTest {
         updatedCancha.setId(canchaId);
         updatedCancha.setNombre("Cancha Actualizada");
         updatedCancha.setTipo("Fútbol 11");
-        updatedCancha.setPrecioHora(2000);
+        updatedCancha.setPrecioHora(precioHora);
         updatedCancha.setDisponibilidad(true);
         updatedCancha.setDeporte(Deporte.FUTBOL);
         updatedCancha.setDescripcion("Descripción Actualizada");
@@ -150,7 +155,7 @@ class CanchaServiceTest {
         CanchaResponseDTO expectedResponse = new CanchaResponseDTO();
         expectedResponse.setNombre("Cancha Actualizada");
         expectedResponse.setTipo("Fútbol 11");
-        expectedResponse.setPrecioHora(2000);
+        expectedResponse.setPrecioHora(precioHora);
         expectedResponse.setDisponibilidad(true);
         expectedResponse.setDeporte(Deporte.FUTBOL);
         expectedResponse.setDescripcion("Descripción Actualizada");
