@@ -88,9 +88,7 @@ class UsuarioServiceTest {
         userRequestUpdateDTO.setNombre("Juan Updated");
         userRequestUpdateDTO.setEmail("juanUpdated@email.com");
 
-        assertThrows(ResourceNotFoundException.class, () -> {
-            usuarioService.update(1L, userRequestUpdateDTO);
-        });
+        assertThrows(ResourceNotFoundException.class, () -> usuarioService.update(1L, userRequestUpdateDTO));
 
         verify(usuarioRepository).findById(1L);
     }
