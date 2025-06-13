@@ -22,7 +22,7 @@ public class NotificationService implements INotificationService {
     public void sendNotificationReservationConfirmed(Usuario user, Long reservaId) {
         String qrData = "http://localhost:5173/validate-reserva/" + reservaId;
 
-        Path tempDirectory = null;
+        Path tempDirectory;
         try {
             tempDirectory = Files.createTempDirectory("qrs");
             System.out.println("Directorio temporal creado: " + tempDirectory.toString());
@@ -57,8 +57,12 @@ public class NotificationService implements INotificationService {
 
             // Eliminar el archivo QR después de enviar el correo
             if (qrFile.exists()) {
-                qrFile.delete();
-                System.out.println("Archivo QR eliminado después de enviar el correo.");
+                boolean deleted = qrFile.delete();
+                if(deleted){
+                    System.out.println("Archivo QR eliminado después de enviar el correo.");
+                }else{
+                    System.err.println("Advertencia: No se pudo eliminar el archivo QR: " + qrFilePath);
+                }
             }
 
         } catch (Exception e) {
