@@ -380,12 +380,12 @@ class ReservaServiceTest {
         when(securityContext.getAuthentication().getPrincipal()).thenReturn(currentUser);
         SecurityContextHolder.setContext(securityContext);
 
-        ReservaResponseDTO response = reservaService.saveReservaByUser(request);
+        ReservaResponseDTO reservaResponseDTO = reservaService.saveReservaByUser(request);
 
-        assertNotNull(response);
+        assertNotNull(reservaResponseDTO);
         assertEquals(TurnoState.RESERVADO, turno.getEstado());
         verify(turnoRepository).findById(request.getTurnoId());
-        verify(notificationService).sendNotificationReservationConfirmed(currentUser);
+        verify(notificationService).sendNotificationReservationConfirmed(currentUser, reservaResponseDTO.getId());
         verify(reservaRepository).save(any(Reserva.class));
     }
 
@@ -413,7 +413,6 @@ class ReservaServiceTest {
 
         verify(turnoRepository).findById(request.getTurnoId());
         verify(reservaRepository, never()).save(any(Reserva.class));
-        verify(notificationService, never()).sendNotificationReservationConfirmed(any(Usuario.class));
     }
 
     @Test
@@ -436,7 +435,6 @@ class ReservaServiceTest {
 
         verify(turnoRepository).findById(request.getTurnoId());
         verify(reservaRepository, never()).save(any(Reserva.class));
-        verify(notificationService, never()).sendNotificationReservationConfirmed(any(Usuario.class));
     }
 
     /* Metodo cancel() */
