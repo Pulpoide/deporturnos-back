@@ -88,9 +88,7 @@ class UsuarioServiceTest {
         userRequestUpdateDTO.setNombre("Juan Updated");
         userRequestUpdateDTO.setEmail("juanUpdated@email.com");
 
-        assertThrows(ResourceNotFoundException.class, () -> {
-            usuarioService.update(1L, userRequestUpdateDTO);
-        });
+        assertThrows(ResourceNotFoundException.class, () -> usuarioService.update(1L, userRequestUpdateDTO));
 
         verify(usuarioRepository).findById(1L);
     }
@@ -107,9 +105,7 @@ class UsuarioServiceTest {
 
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
 
-        assertThrows(InvalidEmailException.class, () -> {
-            usuarioService.update(1L, userRequestUpdateDTO);
-        });
+        assertThrows(InvalidEmailException.class, () -> usuarioService.update(1L, userRequestUpdateDTO));
 
         verify(usuarioRepository).findById(1L);
     }
@@ -130,9 +126,7 @@ class UsuarioServiceTest {
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
         when(usuarioRepository.findByEmail("existinguser@email.com")).thenReturn(Optional.of(existingUser));
 
-        assertThrows(UserAlreadyExistsException.class, () -> {
-            usuarioService.update(1L, userRequestUpdateDTO);
-        });
+        assertThrows(UserAlreadyExistsException.class, () -> usuarioService.update(1L, userRequestUpdateDTO));
 
         verify(usuarioRepository).findById(1L);
         verify(usuarioRepository).findByEmail("existinguser@email.com");
@@ -212,7 +206,7 @@ class UsuarioServiceTest {
 
         when(usuarioRepository.findById(2L)).thenReturn(Optional.of(usuario));
         when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuario);
-        when(mapper.convertValue(usuario, UsuarioResponseDTO.class)).thenReturn(new UsuarioResponseDTO(2L, "Juan Updated", "juanUpdated@email.com", "encodedPassword", null, Rol.ADMIN, true));
+        when(mapper.convertValue(usuario, UsuarioResponseDTO.class)).thenReturn(new UsuarioResponseDTO(2L, "Juan Updated", "juanUpdated@email.com", "encodedPassword", null, Rol.ADMIN, true, false));
 
         UsuarioResponseDTO usuarioResponseDTO = usuarioService.changeRole(2L);
 
