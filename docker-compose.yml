@@ -8,6 +8,7 @@ services:
       POSTGRES_USER: ${SPRING_DATASOURCE_USERNAME}
       POSTGRES_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
       POSTGRES_DB: deporturnos
+      POSTGRES_INITDB_ARGS: "--auth-host=md5 --auth-local=md5"
     volumes:
       - db-data:/var/lib/postgresql/data
 
