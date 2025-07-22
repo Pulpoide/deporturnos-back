@@ -1,10 +1,15 @@
 # --- Fase de Construcción (Build Stage) ---
 FROM gradle:jdk20-alpine AS builder
 WORKDIR /home/gradle/src
-COPY --chown=gradle:gradle gradlew gradle/ build.gradle settings.gradle ./
-COPY --chown=gradle:gradle src/ src/
-RUN chmod +x gradlew \
-    && ./gradlew bootJar --no-daemon
+
+COPY gradlew ./
+COPY gradlew.bat ./
+COPY gradle/wrapper/ gradle/wrapper/
+COPY build.gradle settings.gradle ./
+COPY src/ src/
+
+RUN chmod +x gradlew
+RUN ./gradlew bootJar --no-daemon
 
 # --- Fase de Ejecución (Runtime Stage) ---
 FROM eclipse-temurin:21-jre-alpine
