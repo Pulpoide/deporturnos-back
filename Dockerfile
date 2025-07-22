@@ -18,8 +18,4 @@ EXPOSE 8080
 COPY --from=builder --chown=spring:spring \
      /home/gradle/src/build/libs/*.jar app.jar
 
-ENTRYPOINT ["java",
-  "-XX:+UseContainerSupport",
-  "-XX:MaxRAMPercentage=75.0",
-  "-XX:+UseG1GC",
-  "-jar","app.jar"]
+ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=75.0", "-XX:+UseG1GC", "-jar", "app.jar"]
