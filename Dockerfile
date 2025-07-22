@@ -17,7 +17,6 @@ RUN addgroup -S spring && adduser -S -G spring spring
 
 WORKDIR /app
 USER spring:spring
-
 EXPOSE 8080
 
 COPY --from=builder --chown=spring:spring \
