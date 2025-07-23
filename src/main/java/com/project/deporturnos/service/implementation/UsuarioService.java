@@ -3,10 +3,7 @@ package com.project.deporturnos.service.implementation;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.deporturnos.entity.domain.*;
 import com.project.deporturnos.entity.dto.*;
-import com.project.deporturnos.exception.InvalidEmailException;
-import com.project.deporturnos.exception.InvalidPasswordException;
-import com.project.deporturnos.exception.ResourceNotFoundException;
-import com.project.deporturnos.exception.UserAlreadyExistsException;
+import com.project.deporturnos.exception.*;
 import com.project.deporturnos.repository.IReservaRepository;
 import com.project.deporturnos.repository.IUsuarioRepository;
 import com.project.deporturnos.service.IUsuarioService;
@@ -35,6 +32,7 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
     private final IReservaRepository  reservaRepository;
     private final PasswordEncoder passwordEncoder;
     private final ObjectMapper mapper;
+    private static final Long SUPER_ADMIN_ID = 1L;
 
     @Override
     public List<UsuarioResponseDTO> getAll(){
@@ -54,27 +52,26 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
 
     @Override
     public void delete(Long id){
-        Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
-        if(usuarioOptional.isPresent()){
-            Usuario usuario = usuarioOptional.get();
-            usuario.setDeleted(true);
-            usuario.setActivada(false);
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado."));
 
-            // Marcamos todas las reservas del usuario como eliminadas
-            for(Reserva reserva : usuario.getReservas()){
-                reserva.setDeleted(true);
-
-                // Ponemos el turno asociado a la reserva en estado DISPONIBLE si todas sus reservas estan eliminadas
-                Turno turno = reserva.getTurno();
-                boolean allReservasDeleted = turno.getReservas().stream().allMatch(Reserva::isDeleted);
-                if (allReservasDeleted) {
-                    turno.setEstado(TurnoState.DISPONIBLE);
-                }
-            }
-            usuarioRepository.save(usuario);
-        }else{
-            throw new ResourceNotFoundException("Usuario no encontrado.");
+        if (id.equals(SUPER_ADMIN_ID)) {
+            throw new BusinessRuleException("No es posible eliminar al administrador supremo.");
         }
+
+        usuario.setDeleted(true);
+        usuario.setActivada(false);
+
+        usuario.getReservas().forEach(reserva -> {
+            reserva.setDeleted(true);
+            Turno turno = reserva.getTurno();
+            boolean allDeleted = turno.getReservas().stream().allMatch(Reserva::isDeleted);
+            if (allDeleted) {
+                turno.setEstado(TurnoState.DISPONIBLE);
+            }
+        });
+
+        usuarioRepository.save(usuario);
     }
 
 
@@ -141,46 +138,36 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
 
     @Override
     public UsuarioResponseDTO changeRole(Long id) {
-        Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado."));
 
-        if(usuarioOptional.isEmpty()){
-            throw new ResourceNotFoundException("Usuario no encontrado.");
+        if (id.equals(SUPER_ADMIN_ID)) {
+            throw new BusinessRuleException("No es posible cambiar el rol al administrador supremo.");
         }
 
-        if(id == 1){
-            throw new IllegalArgumentException("No es posible cambiarle el roll al administrador supremo.");
-        }
-
-        Usuario usuario = usuarioOptional.get();
-
-        if(usuarioOptional.get().getRol().equals(Rol.ADMIN)){
+        if (usuario.getRol().equals(Rol.ADMIN)) {
             usuario.setRol(Rol.CLIENTE);
-        }else{
+        } else {
             usuario.setRol(Rol.ADMIN);
         }
 
-        Usuario usuarioSaved = usuarioRepository.save(usuario);
-        return mapper.convertValue(usuarioSaved, UsuarioResponseDTO.class);
+        Usuario saved = usuarioRepository.save(usuario);
+        return mapper.convertValue(saved, UsuarioResponseDTO.class);
     }
 
     @Override
     public LockUnlockResponseDTO lockUnlock(Long id) {
-        Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado."));
 
-        if(usuarioOptional.isEmpty()){
-            throw new ResourceNotFoundException("Usuario no encontrado.");
+        if (id.equals(SUPER_ADMIN_ID)) {
+            throw new BusinessRuleException("No es posible bloquear al administrador supremo.");
         }
 
-        if(id == 1){
-            throw new IllegalArgumentException("No es posible bloquear al administrador supremo.");
-        }
+        usuario.setActivada(!usuario.isActivada());
 
-        Usuario usuario = usuarioOptional.get();
-
-        usuario.setActivada(!usuarioOptional.get().isActivada());
-
-        Usuario usuarioSaved = usuarioRepository.save(usuario);
-        return mapper.convertValue(usuarioSaved, LockUnlockResponseDTO.class);
+        Usuario saved = usuarioRepository.save(usuario);
+        return mapper.convertValue(saved, LockUnlockResponseDTO.class);
     }
 
     @Override

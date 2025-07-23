@@ -26,6 +26,12 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(),HttpStatus.BAD_GATEWAY);
     }
 
+    @ExceptionHandler(BusinessRuleException.class)
+    public ResponseEntity<String> handlerBusinessException(BusinessRuleException ex)
+    {
+        return new ResponseEntity<>(ex.getMessage(),HttpStatus.BAD_REQUEST);
+    }
+
 
 
 
