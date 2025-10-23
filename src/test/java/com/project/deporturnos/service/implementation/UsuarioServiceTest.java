@@ -1,11 +1,11 @@
 package com.project.deporturnos.service.implementation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.deporturnos.entity.domain.Rol;
-import com.project.deporturnos.entity.domain.Usuario;
+import com.project.deporturnos.entity.domain.*;
 import com.project.deporturnos.entity.dto.LockUnlockResponseDTO;
 import com.project.deporturnos.entity.dto.UsuarioRequestUpdateDTO;
 import com.project.deporturnos.entity.dto.UsuarioResponseDTO;
+import com.project.deporturnos.exception.BusinessRuleException;
 import com.project.deporturnos.exception.InvalidEmailException;
 import com.project.deporturnos.exception.ResourceNotFoundException;
 import com.project.deporturnos.exception.UserAlreadyExistsException;
@@ -170,20 +170,28 @@ class UsuarioServiceTest {
     /* Metodo delete() */
     @Test
     void delete_Success(){
+        Turno turno = new Turno();
+        Reserva reserva = new Reserva();
+        reserva.setDeleted(false);
+        reserva.setTurno(turno);
+        turno.setReservas(Set.of(reserva));
+
         Usuario usuario = new Usuario();
-        usuario.setId(1L);
+        usuario.setId(2L);
         usuario.setNombre("Juan");
         usuario.setEmail("juantest@email.com");
         usuario.setDeleted(false);
-        usuario.setReservas(new HashSet<>());
+        usuario.setReservas(Set.of(reserva));
 
-        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findById(2L)).thenReturn(Optional.of(usuario));
 
-        usuarioService.delete(1L);
+        usuarioService.delete(2L);
 
         assertTrue(usuario.isDeleted());
         assertFalse(usuario.isActivada());
-        verify(usuarioRepository).findById(1L);
+        assertTrue(reserva.isDeleted());
+        assertEquals(TurnoState.DISPONIBLE, turno.getEstado());
+        verify(usuarioRepository).findById(2L);
         verify(usuarioRepository).save(usuario);
     }
 
@@ -232,9 +240,9 @@ class UsuarioServiceTest {
 
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(adminSupremo));
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> usuarioService.changeRole(1L));
+        BusinessRuleException exception = assertThrows(BusinessRuleException.class, () -> usuarioService.changeRole(1L));
 
-        assertEquals("No es posible cambiarle el roll al administrador supremo.", exception.getMessage());
+        assertEquals("No es posible cambiar el rol al administrador supremo.", exception.getMessage());
         verify(usuarioRepository).findById(1L);
     }
 
@@ -294,7 +302,7 @@ class UsuarioServiceTest {
 
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(adminSupremo));
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> usuarioService.lockUnlock(1L));
+        BusinessRuleException exception = assertThrows(BusinessRuleException.class, () -> usuarioService.lockUnlock(1L));
 
         assertEquals("No es posible bloquear al administrador supremo.", exception.getMessage());
 
