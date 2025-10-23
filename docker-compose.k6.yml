@@ -1,0 +1,61 @@
+services:
+  k6-stress:
+    image: grafana/k6
+    container_name: k6-stress-runner
+    user: root
+    volumes:
+      - ./k6-tests:/scripts
+      - ./k6-tests/reports:/reports
+    entrypoint: >
+      sh -c "
+        echo '🚀 Ejecutando Stress Test...' &&
+        mkdir -p /reports/stress/json &&
+        k6 run /scripts/stress-test.js --out json=/reports/stress/json/results.json &&
+        echo '✅ JSON Reporte generado en /reports/stress/json/results.json'
+      "
+    environment:
+      - BASE_URL=http://app:8080
+    networks:
+      - deporturnos-back_default
+
+  k6-spike:
+    image: grafana/k6
+    container_name: k6-spike-runner
+    user: root
+    volumes:
+      - ./k6-tests:/scripts
+      - ./k6-tests/reports:/reports
+    entrypoint: >
+      sh -c "
+        echo '🚀 Ejecutando Spike Test...' &&
+        mkdir -p /reports/spike/json &&
+        k6 run /scripts/spike-test.js --out json=/reports/spike/json/results.json &&
+        echo '✅ JSON Reporte generado en /reports/spike/json/results.json'
+      "
+    environment:
+      - BASE_URL=http://app:8080
+    networks:
+      - deporturnos-back_default
+
+  k6-load:
+    image: grafana/k6
+    container_name: k6-load-runner
+    user: root
+    volumes:
+      - ./k6-tests:/scripts
+      - ./k6-tests/reports:/reports
+    entrypoint: >
+      sh -c "
+        echo '🚀 Ejecutando Load Test...' &&
+        mkdir -p /reports/load/json &&
+        k6 run /scripts/load-test.js --out json=/reports/load/json/results.json &&
+        echo '✅ JSON Reporte generado en /reports/load/json/results.json'
+      "
+    environment:
+      - BASE_URL=http://app:8080
+    networks:
+      - deporturnos-back_default
+
+networks:
+  deporturnos-back_default:
+    external: true
