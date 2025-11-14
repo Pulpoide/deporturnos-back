@@ -16,17 +16,19 @@ import com.project.deporturnos.repository.ITurnoRepository;
 import com.project.deporturnos.repository.TurnoSpecification;
 import com.project.deporturnos.service.ITurnoService;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
 
 @Service
 @RequiredArgsConstructor
@@ -37,20 +39,22 @@ public class TurnoService implements ITurnoService {
     private final ObjectMapper mapper;
 
     public TurnoResponseDTO save(TurnoRequestDTO turnoRequestDTO) {
-        //Validamos que la cancha exista para crearle un turno
+        // Validamos que la cancha exista para crearle un turno
         Cancha cancha = canchaRepository.findById(turnoRequestDTO.getCanchaId())
                 .orElseThrow(() -> new ResourceNotFoundException("Cancha no encontrada."));
 
         Turno turno = mapper.convertValue(turnoRequestDTO, Turno.class);
 
-        // Validamos que no exista otro turno con la misma hora de inicio y la misma fecha para esa cancha
-        for(Turno turno1 : cancha.getTurnos()){
-            if(!turno1.isDeleted() && turno1.getHoraInicio().equals(turnoRequestDTO.getHoraInicio()) && turno1.getFecha().equals(turnoRequestDTO.getFecha())){
+        // Validamos que no exista otro turno con la misma hora de inicio y la misma
+        // fecha para esa cancha
+        for (Turno turno1 : cancha.getTurnos()) {
+            if (!turno1.isDeleted() && turno1.getHoraInicio().equals(turnoRequestDTO.getHoraInicio())
+                    && turno1.getFecha().equals(turnoRequestDTO.getFecha())) {
                 throw new TurnoStartTimeAlreadyExistException("Ya existe el turno que está intentando crear.");
             }
         }
 
-        if(turnoRequestDTO.getHoraInicio().equals(turnoRequestDTO.getHoraFin())){
+        if (turnoRequestDTO.getHoraInicio().equals(turnoRequestDTO.getHoraFin())) {
             throw new TurnoStartTimeAlreadyExistException("La hora de inicio no puede ser igual a la hora de fin.");
         }
 
@@ -59,74 +63,70 @@ public class TurnoService implements ITurnoService {
         turno.setHoraFin(turnoRequestDTO.getHoraFin());
         turno.setEstado(TurnoState.DISPONIBLE);
 
-        if(cancha.isDisponibilidad()){
+        if (cancha.isDisponibilidad()) {
             turno.setCancha(cancha);
-        }else{
+        } else {
             throw new CanchaNotAvailableException("La cancha no está disponible.");
         }
-
-
 
         Turno turnoSaved = turnoRepository.save(turno);
         return mapper.convertValue(turnoSaved, TurnoResponseDTO.class);
     }
 
     @Override
-    public List<TurnoResponseDTO> getAll() {
-        List<Turno> turnos = turnoRepository.findAllByDeletedFalse();
+    public Page<TurnoResponseDTO> getPaginatedData(int page, int size, String sortBy) {
 
-        if(turnos.isEmpty()){
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
+
+        Page<Turno> turnosPage = turnoRepository.findAllByDeletedFalse(pageable);
+
+        if (turnosPage.isEmpty()) {
             throw new ResourceNotFoundException("No se encontraron turnos para listar.");
         }
 
-        List<TurnoResponseDTO> turnoResponseDTOS = new ArrayList<>();
-        for(Turno turno : turnos){
-            turnoResponseDTOS.add(mapper.convertValue(turno, TurnoResponseDTO.class));
-        }
-
-        return turnoResponseDTOS;
+        return turnosPage.map(turno -> mapper.convertValue(turno, TurnoResponseDTO.class));
     }
 
     @Override
     public TurnoResponseDTO update(Long id, TurnoRequestUpdateDTO turnoRequestUpdateDTO) {
         Optional<Turno> turnoOptional = turnoRepository.findById(id);
 
-        if(turnoOptional.isEmpty()){
+        if (turnoOptional.isEmpty()) {
             throw new ResourceNotFoundException("Turno no encontrado.");
         }
 
         Turno turno = turnoOptional.get();
 
         // Validamos que no exista otro turno con la misma hora de inicio para la cancha
-        for(Turno turno1 : turno.getCancha().getTurnos()){
-            if(!turno1.isDeleted() && turno1.getHoraInicio().equals(turnoRequestUpdateDTO.getHoraInicio())){
-                throw new TurnoStartTimeAlreadyExistException("Ya existe un turno con esa hora de inicio para esta cancha.");
+        for (Turno turno1 : turno.getCancha().getTurnos()) {
+            if (!turno1.isDeleted() && turno1.getHoraInicio().equals(turnoRequestUpdateDTO.getHoraInicio())) {
+                throw new TurnoStartTimeAlreadyExistException(
+                        "Ya existe un turno con esa hora de inicio para esta cancha.");
             }
         }
 
-
-        if(turnoRequestUpdateDTO.getFecha() != null){
+        if (turnoRequestUpdateDTO.getFecha() != null) {
             turno.setFecha(turnoRequestUpdateDTO.getFecha());
         }
 
-        if(turnoRequestUpdateDTO.getHoraInicio() != null){
+        if (turnoRequestUpdateDTO.getHoraInicio() != null) {
             turno.setHoraInicio(turnoRequestUpdateDTO.getHoraInicio());
         }
 
-        if(turnoRequestUpdateDTO.getHoraFin() != null){
+        if (turnoRequestUpdateDTO.getHoraFin() != null) {
             turno.setHoraFin(turnoRequestUpdateDTO.getHoraFin());
         }
 
-        if(turnoRequestUpdateDTO.getEstado() != null){
+        if (turnoRequestUpdateDTO.getEstado() != null) {
             turno.setEstado(turnoRequestUpdateDTO.getEstado());
         }
 
-        if(turnoRequestUpdateDTO.getCanchaId() != null){
+        if (turnoRequestUpdateDTO.getCanchaId() != null) {
             Cancha cancha = canchaRepository.findById(turnoRequestUpdateDTO.getCanchaId())
                     .orElseThrow(() -> new ResourceNotFoundException("Cancha no encontrada."));
-            if(cancha.isDisponibilidad()) {
+            if (cancha.isDisponibilidad()) {
                 turno.setCancha(cancha);
-            }else{
+            } else {
                 throw new CanchaNotAvailableException("Cancha no disponible.");
             }
         }
@@ -147,7 +147,7 @@ public class TurnoService implements ITurnoService {
         });
 
         if (turnoOptional.isEmpty()) {
-        throw new ResourceNotFoundException("Turno no encontrado.");
+            throw new ResourceNotFoundException("Turno no encontrado.");
         }
     }
 
@@ -156,15 +156,15 @@ public class TurnoService implements ITurnoService {
 
         List<Turno> turnos = turnoRepository.findAll();
 
-        if(turnos.isEmpty()){
+        if (turnos.isEmpty()) {
             throw new ResourceNotFoundException("No se encontraron turnos para listar.");
         }
 
         List<TurnoResponseDTO> turnoAvailableResponseDTOS = new ArrayList<>();
-        for(Turno turno : turnos){
-            if(turno.getEstado().equals(TurnoState.DISPONIBLE)) {
-                if(turno.getCancha().getId().equals(id)) {
-                    if(turno.getFecha().equals(fecha)) {
+        for (Turno turno : turnos) {
+            if (turno.getEstado().equals(TurnoState.DISPONIBLE)) {
+                if (turno.getCancha().getId().equals(id)) {
+                    if (turno.getFecha().equals(fecha)) {
                         turnoAvailableResponseDTOS.add(mapper.convertValue(turno, TurnoResponseDTO.class));
                     }
                 }
@@ -175,29 +175,27 @@ public class TurnoService implements ITurnoService {
     }
 
     @Transactional
-    public int cargaMasivaTurnos(CargaMasivaTurnosDTO cargaMasivaTurnosDTO){
+    public int cargaMasivaTurnos(CargaMasivaTurnosDTO cargaMasivaTurnosDTO) {
         LocalDate fechaActual = cargaMasivaTurnosDTO.getFechaDesde();
         int turnosCreados = 0;
 
         Cancha cancha = canchaRepository.findById(cargaMasivaTurnosDTO.getCanchaId())
                 .orElseThrow(() -> new ResourceNotFoundException("Cancha no encontrada."));
 
-        if(!cancha.isDisponibilidad()) {
+        if (!cancha.isDisponibilidad()) {
             throw new CanchaNotAvailableException("Cancha no disponible.");
         }
-
 
         while (!fechaActual.isAfter(cargaMasivaTurnosDTO.getFechaHasta())) {
             LocalTime horaActual = cargaMasivaTurnosDTO.getHoraDesde();
 
             while (horaActual.isBefore(cargaMasivaTurnosDTO.getHoraHasta())) {
                 boolean turnoExistente = turnoRepository.existsByCanchaAndFechaAndHoraInicio(
-                        cancha, fechaActual, horaActual
-                );
+                        cancha, fechaActual, horaActual);
 
                 if (turnoExistente) {
                     throw new TurnoStartTimeAlreadyExistException("Turno existente.");
-                }else{
+                } else {
                     Turno nuevoTurno = new Turno();
                     nuevoTurno.setFecha(fechaActual);
                     nuevoTurno.setHoraInicio(horaActual);
@@ -218,23 +216,21 @@ public class TurnoService implements ITurnoService {
         return turnosCreados;
     }
 
-    public List<TurnoResponseDTO> getTurnosEntreFechas(LocalDate fechaDesde, LocalDate fechaHasta) {
-        LocalDate fechaDesdeDate = (fechaDesde != null) ? Date.valueOf(fechaDesde).toLocalDate() : null;
-        LocalDate fechaHastaDate = (fechaHasta != null) ? Date.valueOf(fechaHasta).toLocalDate() : null;
+    public Page<TurnoResponseDTO> getTurnosEntreFechas(LocalDate fechaDesde, LocalDate fechaHasta, int page, int size,
+            String sortBy) {
 
-        // Creamos la especificación del filtro
-        TurnoSpecification specification = new TurnoSpecification(fechaDesdeDate, fechaHastaDate);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
 
-        // Buscamos los turnos usando la especificación
-        List<Turno> turnos = turnoRepository.findAll(specification);
+        TurnoSpecification specification = new TurnoSpecification(fechaDesde, fechaHasta);
 
-        if (turnos.isEmpty()) {
-            throw new ResourceNotFoundException("No se encontraron turnos para listar en el rango de fechas proporcionado.");
+        Page<Turno> turnosPage = turnoRepository.findAll(specification, pageable);
+
+        if (turnosPage.isEmpty()) {
+            throw new ResourceNotFoundException(
+                    "No se encontraron turnos para listar en el rango de fechas proporcionado o en la página solicitada.");
         }
 
-        return turnos.stream()
-                .map(turno -> mapper.convertValue(turno, TurnoResponseDTO.class))
-                .collect(Collectors.toList());
+        return turnosPage.map(turno -> mapper.convertValue(turno, TurnoResponseDTO.class));
     }
 
 }
