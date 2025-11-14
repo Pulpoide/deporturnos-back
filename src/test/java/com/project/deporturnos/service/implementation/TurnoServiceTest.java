@@ -17,6 +17,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -41,7 +46,6 @@ class TurnoServiceTest {
 
     @Mock
     private ObjectMapper mapper;
-
 
     /* Metodo save() */
     @Test
@@ -72,7 +76,6 @@ class TurnoServiceTest {
         turnoResponseDTO.setHoraFin(turnoRequestDTO.getHoraFin());
         turnoResponseDTO.setEstado(turnoRequestDTO.getEstado());
         turnoResponseDTO.setCancha(cancha);
-
 
         when(canchaRepository.findById(1L)).thenReturn(Optional.of(cancha));
         when(turnoRepository.save(any(Turno.class))).thenReturn(turno);
@@ -148,33 +151,51 @@ class TurnoServiceTest {
         when(canchaRepository.findById(1L)).thenReturn(Optional.of(cancha));
         when(mapper.convertValue(turnoRequestDTO, Turno.class)).thenReturn(turno);
 
-        assertThrows(CanchaNotAvailableException.class, () ->
-                turnoService.save(turnoRequestDTO));
+        assertThrows(CanchaNotAvailableException.class, () -> turnoService.save(turnoRequestDTO));
 
         verify(turnoRepository, never()).save(any(Turno.class));
     }
 
     /* Metodo getAll() */
+    // Nuevo método: getPaginatedData(int page, int size, String sortBy)
     @Test
-    void getAll_Success() {
-        List<Turno> turnos = List.of(new Turno());
-        TurnoResponseDTO expectedResponse = new TurnoResponseDTO();
+    void getPaginatedData_Success() {
+        int page = 0;
+        int size = 10;
+        String sortBy = "fecha";
 
-        when(turnoRepository.findAllByDeletedFalse()).thenReturn(turnos);
+        Turno turno = new Turno();
+        List<Turno> turnos = List.of(turno);
+        TurnoResponseDTO expectedResponse = new TurnoResponseDTO(); // DTO esperado
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
+        Page<Turno> turnosPage = new PageImpl<>(turnos, pageable, turnos.size());
+
+        when(turnoRepository.findAllByDeletedFalse(pageable)).thenReturn(turnosPage);
         when(mapper.convertValue(any(Turno.class), eq(TurnoResponseDTO.class))).thenReturn(expectedResponse);
 
-        List<TurnoResponseDTO> actualResponse = turnoService.getAll();
+        Page<TurnoResponseDTO> actualResponse = turnoService.getPaginatedData(page, size, sortBy);
 
         assertNotNull(actualResponse);
-        assertEquals(1, actualResponse.size());
-        assertEquals(expectedResponse, actualResponse.get(0));
+        assertEquals(1, actualResponse.getTotalElements()); // Verifica el total de elementos
+        assertEquals(1, actualResponse.getContent().size()); // Verifica el tamaño de la página
+        assertEquals(expectedResponse, actualResponse.getContent().get(0)); // Verifica el DTO
+        verify(turnoRepository, times(1)).findAllByDeletedFalse(pageable); // Verifica que se llamó con el Pageable
+                                                                           // correcto
     }
 
     @Test
-    void getAll_NotFound() {
-        when(turnoRepository.findAllByDeletedFalse()).thenReturn(Collections.emptyList());
+    void getPaginatedData_NotFound() {
+        int page = 0;
+        int size = 10;
+        String sortBy = "fecha";
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
 
-        assertThrows(ResourceNotFoundException.class, () -> turnoService.getAll());
+        Page<Turno> emptyPage = Page.empty(pageable);
+
+        when(turnoRepository.findAllByDeletedFalse(pageable)).thenReturn(emptyPage);
+
+        assertThrows(ResourceNotFoundException.class, () -> turnoService.getPaginatedData(page, size, sortBy));
     }
 
     /* Metodo update() */
@@ -336,7 +357,7 @@ class TurnoServiceTest {
         verify(turnoRepository, never()).save(any(Turno.class));
     }
 
-    /* Metodo getAllAvailableByCanchaAndDate()*/
+    /* Metodo getAllAvailableByCanchaAndDate() */
     @Test
     void getAllAvailableByCanchaAndDate_Success() {
         LocalDate fecha = LocalDate.now();
