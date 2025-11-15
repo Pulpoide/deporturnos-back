@@ -3,6 +3,9 @@ package com.project.deporturnos.repository;
 import com.project.deporturnos.entity.domain.Cancha;
 import com.project.deporturnos.entity.domain.Turno;
 import com.project.deporturnos.entity.domain.TurnoState;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -18,7 +21,7 @@ import java.util.List;
 public interface ITurnoRepository extends JpaRepository<Turno, Long>, JpaSpecificationExecutor<Turno> {
 
     @Query("SELECT t FROM Turno t WHERE t.deleted = false")
-    List<Turno> findAllByDeletedFalse();
+    Page<Turno> findAllByDeletedFalse(Pageable pageable);
 
     boolean existsByCanchaAndFechaAndHoraInicio(Cancha cancha, LocalDate fecha, LocalTime horaInicio);
 

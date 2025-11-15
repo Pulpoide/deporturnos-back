@@ -8,10 +8,12 @@ import com.project.deporturnos.entity.dto.TurnoResponseDTO;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+
 public interface ITurnoService {
     TurnoResponseDTO save(TurnoRequestDTO turnoRequestDTO);
 
-    List<TurnoResponseDTO> getAll();
+    Page<TurnoResponseDTO> getPaginatedData(int page, int size, String sortBy);
 
     TurnoResponseDTO update(Long id, TurnoRequestUpdateDTO turnoRequestUpdateDTO);
 
@@ -21,5 +23,5 @@ public interface ITurnoService {
 
     int cargaMasivaTurnos(CargaMasivaTurnosDTO cargaMasivaTurnosDTO);
 
-    List<TurnoResponseDTO> getTurnosEntreFechas(LocalDate fechaDesde, LocalDate fechaHasta);
+    Page<TurnoResponseDTO> getTurnosEntreFechas(LocalDate fechaDesde, LocalDate fechaHasta, int page, int size, String sortBy);
 }
