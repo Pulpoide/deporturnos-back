@@ -6,7 +6,6 @@ import com.project.deporturnos.entity.dto.ReservaRequestDTO;
 import com.project.deporturnos.entity.dto.ReservaRequestUpdateDTO;
 import com.project.deporturnos.entity.dto.ReservaResponseDTO;
 import com.project.deporturnos.entity.dto.TurnoResponseDTO;
-import com.project.deporturnos.entity.dto.UsuarioResponseDTO;
 import com.project.deporturnos.entity.dto.UsuarioSimpleDTO;
 import com.project.deporturnos.exception.ReservaAlreadyCancelledException;
 import com.project.deporturnos.exception.ResourceNotFoundException;
@@ -33,7 +32,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
