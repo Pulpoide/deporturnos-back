@@ -2,6 +2,9 @@ package com.project.deporturnos.repository;
 
 import com.project.deporturnos.entity.domain.Rol;
 import com.project.deporturnos.entity.domain.Usuario;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -12,16 +15,16 @@ import java.util.Optional;
 
 @EnableJpaRepositories
 @Repository
- public interface IUsuarioRepository extends JpaRepository<Usuario, Long> {
+public interface IUsuarioRepository extends JpaRepository<Usuario, Long> {
 
     Optional<Usuario> findOneByEmailAndPassword(String nombre, String password);
 
     Optional<Usuario> findByEmail(String email);
 
-   List<Usuario> findByDeletedFalseAndRolAndNotificacionesTrue(Rol rol);
+    List<Usuario> findByDeletedFalseAndRolAndNotificacionesTrue(Rol rol);
 
-   @Query("SELECT u FROM Usuario u WHERE u.deleted = false")
-    List<Usuario> findAllByDeletedFalse();
+    @Query("SELECT u FROM Usuario u WHERE u.deleted = false")
+    Page<Usuario> findAllByDeletedFalse(Pageable pageable);
 
     Optional<Usuario> findByVerificationCode(String verificationCode);
 }

@@ -38,19 +38,14 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
     private static final Long SUPER_ADMIN_ID = 1L;
 
     @Override
-    public List<UsuarioResponseDTO> getAll() {
-        List<Usuario> usuarios = usuarioRepository.findAllByDeletedFalse();
+    public Page<UsuarioSimpleDTO> getPaginatedData(Pageable pageable) {
+        Page<Usuario> usuariosPage = usuarioRepository.findAllByDeletedFalse(pageable);
 
-        if (usuarios.isEmpty()) {
+        if (usuariosPage.isEmpty()) {
             throw new ResourceNotFoundException("No se encontraron usuarios para listar.");
         }
 
-        List<UsuarioResponseDTO> usuarioResponseDTOS = new ArrayList<>();
-        for (Usuario usuario : usuarios) {
-            usuarioResponseDTOS.add(mapper.convertValue(usuario, UsuarioResponseDTO.class));
-        }
-
-        return usuarioResponseDTOS;
+        return usuariosPage.map(usuario -> mapper.convertValue(usuario, UsuarioSimpleDTO.class));
     }
 
     @Override

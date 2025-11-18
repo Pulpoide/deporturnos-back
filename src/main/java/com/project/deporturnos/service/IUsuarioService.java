@@ -8,14 +8,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface IUsuarioService {
 
     UsuarioResponseDTO update(Long id, UsuarioRequestUpdateDTO usuarioRequestUpdateDTO);
 
-    List<UsuarioResponseDTO> getAll();
+    Page<UsuarioSimpleDTO> getPaginatedData(Pageable pageable);
 
     void delete(Long id);
 

@@ -10,12 +10,12 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-
 
 @RestController
 @CrossOrigin
@@ -31,8 +31,9 @@ public class UsuarioController {
     // Endpoint para obtener todos los usuarios
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping
-    public ResponseEntity<?> getAll() {
-        return ResponseEntity.ok(usuarioService.getAll());
+    public ResponseEntity<Page<UsuarioSimpleDTO>> getAll(
+            @PageableDefault(page = 0, size = 20, sort = "id") Pageable pageable) {
+        return ResponseEntity.ok(usuarioService.getPaginatedData(pageable));
     }
 
     // Endpoint para actualizar usuario
