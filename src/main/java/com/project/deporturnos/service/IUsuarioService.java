@@ -1,19 +1,20 @@
 package com.project.deporturnos.service;
 
-import com.project.deporturnos.entity.domain.Reserva;
 import com.project.deporturnos.entity.domain.Usuario;
 import com.project.deporturnos.entity.dto.*;
 import jakarta.validation.Valid;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface IUsuarioService {
 
     UsuarioResponseDTO update(Long id, UsuarioRequestUpdateDTO usuarioRequestUpdateDTO);
 
-    List<UsuarioResponseDTO> getAll();
+    Page<UsuarioSimpleDTO> getPaginatedData(Pageable pageable);
 
     void delete(Long id);
 
@@ -21,7 +22,7 @@ public interface IUsuarioService {
 
     LockUnlockResponseDTO lockUnlock(Long id);
 
-    List<Reserva> findReservationsByUserId(Long id, boolean includeCompleted);
+    Page<ReservaResponseDTO> findReservationsByUserIdPaginated(Long id, boolean includeCompleted, Pageable pageable);
 
     ProfileResUpdateDTO updateProfile(Long id, @Valid ProfileReqUpdateDTO profileReqUpdateDTO);
 

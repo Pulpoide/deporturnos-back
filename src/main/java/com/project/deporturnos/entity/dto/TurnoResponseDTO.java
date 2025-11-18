@@ -1,6 +1,5 @@
 package com.project.deporturnos.entity.dto;
 
-import com.project.deporturnos.entity.domain.Cancha;
 import com.project.deporturnos.entity.domain.TurnoState;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,5 +25,5 @@ public class TurnoResponseDTO {
 
     private TurnoState estado;
 
-    private Cancha cancha;
+    private CanchaSimpleDTO cancha;
 }

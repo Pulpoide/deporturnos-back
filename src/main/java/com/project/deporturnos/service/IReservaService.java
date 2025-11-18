@@ -5,12 +5,13 @@ import com.project.deporturnos.entity.dto.ReservaRequestUpdateDTO;
 import com.project.deporturnos.entity.dto.ReservaResponseDTO;
 
 import java.time.LocalDate;
-import java.util.List;
+
+import org.springframework.data.domain.Page;
 
 public interface IReservaService {
     ReservaResponseDTO save(ReservaRequestDTO reservaRequestDTO);
 
-    List<ReservaResponseDTO> getAll();
+    Page<ReservaResponseDTO> getPaginatedData(int page, int size, String sortBy);
 
     ReservaResponseDTO update(Long id, ReservaRequestUpdateDTO reservaRequestUpdateDTO);
 
@@ -20,7 +21,7 @@ public interface IReservaService {
 
     void cancel(Long id);
 
-    List<ReservaResponseDTO> getReservasEntreFechas(LocalDate fechaDesde, LocalDate fechaHasta);
+    Page<ReservaResponseDTO> getReservasEntreFechas(LocalDate fechaDesde, LocalDate fechaHasta, int page, int size, String sortBy);
 
     ReservaResponseDTO getById(Long id);
 

@@ -12,17 +12,19 @@ import com.project.deporturnos.repository.IUsuarioRepository;
 import com.project.deporturnos.repository.ReservaSpecification;
 import com.project.deporturnos.service.IReservaService;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -51,7 +53,7 @@ public class ReservaService implements IReservaService {
         reserva.setTurno(turno);
         reserva.setFecha(LocalDate.now());
 
-        if(turno.getEstado().equals(TurnoState.RESERVADO)){
+        if (turno.getEstado().equals(TurnoState.RESERVADO)) {
             throw new TurnoAlreadyReservedException("Turno no disponible.");
         }
         turno.setEstado(TurnoState.RESERVADO);
@@ -61,50 +63,48 @@ public class ReservaService implements IReservaService {
     }
 
     @Override
-    public List<ReservaResponseDTO> getAll() {
-        List<Reserva> reservas = reservaRepository.findAllByDeletedFalse();
+    public Page<ReservaResponseDTO> getPaginatedData(int page, int size, String sortBy) {
 
-        if(reservas.isEmpty()){
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
+
+        Page<Reserva> reservasPage = reservaRepository.findAllByDeletedFalse(pageable);
+
+        if (reservasPage.isEmpty()) {
             throw new ResourceNotFoundException("No se encontraron reservas para listar.");
         }
 
-        List<ReservaResponseDTO> reservaResponseDTOS = new ArrayList<>();
-        for(Reserva reserva : reservas){
-            reservaResponseDTOS.add(mapper.convertValue(reserva, ReservaResponseDTO.class));
-        }
-
-        return reservaResponseDTOS;
+        return reservasPage.map(reserva -> mapper.convertValue(reserva, ReservaResponseDTO.class));
     }
 
     @Override
     public ReservaResponseDTO update(Long id, ReservaRequestUpdateDTO reservaRequestUpdateDTO) {
         Optional<Reserva> reservaOptional = reservaRepository.findById(id);
 
-        if(reservaOptional.isEmpty()){
+        if (reservaOptional.isEmpty()) {
             throw new ResourceNotFoundException("Reserva no encontrada.");
         }
 
         Reserva reserva = reservaOptional.get();
 
-        //Manejo de estados
-        if(reservaRequestUpdateDTO.getEstado() != null){
+        // Manejo de estados
+        if (reservaRequestUpdateDTO.getEstado() != null) {
 
             ReservaState reservaState = reservaRequestUpdateDTO.getEstado();
             TurnoState turnoState = reserva.getTurno().getEstado();
 
-            if(reservaState.equals(ReservaState.CANCELADA)){
+            if (reservaState.equals(ReservaState.CANCELADA)) {
                 reserva.getTurno().setEstado(TurnoState.DISPONIBLE);
 
             } else if (reservaState.equals(ReservaState.CONFIRMADA)) {
 
-                if(turnoState.equals(TurnoState.RESERVADO)){
+                if (turnoState.equals(TurnoState.RESERVADO)) {
                     throw new TurnoAlreadyReservedException("Turno no disponible.");
                 }
 
                 reserva.getTurno().setEstado(TurnoState.RESERVADO);
 
-            } else if(reservaState.equals(ReservaState.COMPLETADA)){
-                if(turnoState.equals(TurnoState.RESERVADO)){
+            } else if (reservaState.equals(ReservaState.COMPLETADA)) {
+                if (turnoState.equals(TurnoState.RESERVADO)) {
                     reserva.getTurno().setEstado(TurnoState.COMPLETADO);
                 }
             }
@@ -112,11 +112,11 @@ public class ReservaService implements IReservaService {
             reserva.setEstado(reservaRequestUpdateDTO.getEstado());
         }
 
-        if(reservaRequestUpdateDTO.getTurnoId() != null) {
+        if (reservaRequestUpdateDTO.getTurnoId() != null) {
             Turno turno = turnoRepository.findById(reservaRequestUpdateDTO.getTurnoId())
                     .orElseThrow(() -> new ResourceNotFoundException("Turno no encontrado."));
 
-            if(turno.getEstado().equals(TurnoState.RESERVADO)){
+            if (turno.getEstado().equals(TurnoState.RESERVADO)) {
                 throw new TurnoAlreadyReservedException("Turno no disponible.");
             }
             // El Turno anterior de esa reserva pasa a estar disponible
@@ -128,18 +128,17 @@ public class ReservaService implements IReservaService {
             reserva.setTurno(turno);
         }
 
-        if(reservaRequestUpdateDTO.getUsuarioId() != null){
+        if (reservaRequestUpdateDTO.getUsuarioId() != null) {
             Usuario usuario = usuarioRepository.findById(reservaRequestUpdateDTO.getUsuarioId())
                     .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado."));
             reserva.setUsuario(usuario);
         }
 
-        if(reservaRequestUpdateDTO.getFecha() != null){
+        if (reservaRequestUpdateDTO.getFecha() != null) {
             reserva.setFecha(reservaRequestUpdateDTO.getFecha());
-        }else{
+        } else {
             reserva.setFecha(LocalDate.now());
         }
-
 
         Reserva reservaUpdated = reservaRepository.save(reserva);
         return mapper.convertValue(reservaUpdated, ReservaResponseDTO.class);
@@ -163,7 +162,7 @@ public class ReservaService implements IReservaService {
         Turno turno = turnoRepository.findById(reservaRequestDTO.getTurnoId())
                 .orElseThrow(() -> new ResourceNotFoundException("Turno no encontrado."));
 
-        if(turno.getEstado().equals(TurnoState.RESERVADO)){
+        if (turno.getEstado().equals(TurnoState.RESERVADO)) {
             throw new TurnoAlreadyReservedException("Turno no disponible.");
         }
         turno.setEstado(TurnoState.RESERVADO);
@@ -174,7 +173,6 @@ public class ReservaService implements IReservaService {
         reserva.setTurno(turno);
         reserva.setEstado(ReservaState.CONFIRMADA);
         reserva.setFecha(LocalDate.now());
-
 
         Reserva reservaSaved = reservaRepository.save(reserva);
 
@@ -188,16 +186,16 @@ public class ReservaService implements IReservaService {
         Optional<Reserva> reservaOptional = reservaRepository.findById(id);
         Usuario currentUser = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        if(reservaOptional.isPresent()){
+        if (reservaOptional.isPresent()) {
             Reserva reservaCancel = reservaOptional.get();
             Turno turno = reservaCancel.getTurno();
             LocalDate now = LocalDate.now();
 
-            if(reservaCancel.getEstado().equals(ReservaState.CANCELADA)){
+            if (reservaCancel.getEstado().equals(ReservaState.CANCELADA)) {
                 throw new ReservaAlreadyCancelledException("La reserva ya se encuentra cancelada.");
             }
 
-            if(currentUser.getRol().equals(Rol.CLIENTE)) {
+            if (currentUser.getRol().equals(Rol.CLIENTE)) {
                 if (!Objects.equals(reservaCancel.getUsuario().getId(), currentUser.getId())) {
                     throw new InsufficientAuthenticationException("No autorizado.");
                 }
@@ -205,43 +203,48 @@ public class ReservaService implements IReservaService {
 
             turno.setEstado(TurnoState.DISPONIBLE);
 
-            if(Objects.equals(turno.getFecha(), now) || Objects.equals(turno.getFecha(), now.plusDays(1))){
-                //List<Usuario> usuariosANotificar = usuarioRepository.findByDeletedFalseAndRolAndNotificacionesTrue(Rol.CLIENTE);
+            if (Objects.equals(turno.getFecha(), now) || Objects.equals(turno.getFecha(), now.plusDays(1))) {
+                // List<Usuario> usuariosANotificar =
+                // usuarioRepository.findByDeletedFalseAndRolAndNotificacionesTrue(Rol.CLIENTE);
 
                 // Enviar email a usuarios notification=true ->
-                //notificationService.notifyUsersAboutPromotions(usuariosANotificar, turno, reservaCancel.getUsuario());
+                // notificationService.notifyUsersAboutPromotions(usuariosANotificar, turno,
+                // reservaCancel.getUsuario());
             }
 
             reservaCancel.setEstado(ReservaState.CANCELADA);
             reservaRepository.save(reservaCancel);
-        }else{
+        } else {
             throw new ResourceNotFoundException("Reserva no encontrada.");
         }
     }
 
-    public List<ReservaResponseDTO> getReservasEntreFechas(LocalDate fechaDesde, LocalDate fechaHasta) {
+    public Page<ReservaResponseDTO> getReservasEntreFechas(LocalDate fechaDesde, LocalDate fechaHasta, int page,
+            int size,
+            String sortBy) {
         LocalDate fechaDesdeDate = (fechaDesde != null) ? Date.valueOf(fechaDesde).toLocalDate() : null;
         LocalDate fechaHastaDate = (fechaHasta != null) ? Date.valueOf(fechaHasta).toLocalDate() : null;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
 
         // Especificación de la reserva
         ReservaSpecification specification = new ReservaSpecification(fechaDesdeDate, fechaHastaDate);
 
         // Buscamos las reservas usando la especificación
-        List<Reserva> reservas = reservaRepository.findAll(specification);
+        Page<Reserva> reservasPage = reservaRepository.findAll(specification, pageable);
 
-        if(reservas.isEmpty()){
-            throw new ResourceNotFoundException("No se encontraron reservas para listar en el rango de fechas proporcionado.");
+        if (reservasPage.isEmpty()) {
+            throw new ResourceNotFoundException(
+                    "No se encontraron reservas para listar en el rango de fechas proporcionado.");
         }
 
-        return reservas.stream()
-                .map(reserva -> mapper.convertValue(reserva, ReservaResponseDTO.class))
-                .collect(Collectors.toList());
+        return reservasPage.map(reserva -> mapper.convertValue(reserva, ReservaResponseDTO.class));
     }
 
     @Override
     public ReservaResponseDTO getById(Long id) {
         Optional<Reserva> reservaOptional = reservaRepository.findById(id);
-        if(reservaOptional.isEmpty() || reservaOptional.get().isDeleted()){
+        if (reservaOptional.isEmpty() || reservaOptional.get().isDeleted()) {
             throw new ResourceNotFoundException("Reserva no encontrada.");
         }
         return mapper.convertValue(reservaOptional, ReservaResponseDTO.class);
@@ -251,23 +254,24 @@ public class ReservaService implements IReservaService {
     public void empezarReserva(Long reservaId) {
         Optional<Reserva> reservaOptional = reservaRepository.findById(reservaId);
 
-        if(reservaOptional.isEmpty() || reservaOptional.get().isDeleted()){
+        if (reservaOptional.isEmpty() || reservaOptional.get().isDeleted()) {
             throw new ResourceNotFoundException("Reserva no encontrada.");
         }
 
-        if(reservaOptional.get().getEstado().equals(ReservaState.CANCELADA)){
-            throw new ReservaAlreadyCancelledException("La reserva se encuentra cancelada. No se puede iniciar una reserva cancelada.");
+        if (reservaOptional.get().getEstado().equals(ReservaState.CANCELADA)) {
+            throw new ReservaAlreadyCancelledException(
+                    "La reserva se encuentra cancelada. No se puede iniciar una reserva cancelada.");
         }
 
-        if(reservaOptional.get().getEstado().equals(ReservaState.EN_PROCESO)){
+        if (reservaOptional.get().getEstado().equals(ReservaState.EN_PROCESO)) {
             throw new ReservaAlreadyInProcessException("La reserva ya se encuentra en proceso.");
         }
 
-        if(reservaOptional.get().getEstado().equals(ReservaState.COMPLETADA)){
+        if (reservaOptional.get().getEstado().equals(ReservaState.COMPLETADA)) {
             throw new ReservaAlreadyCompletedException("La reserva ya se encuentra completada.");
         }
 
-        if(!Objects.equals(reservaOptional.get().getFecha(), LocalDate.now())){
+        if (!Objects.equals(reservaOptional.get().getFecha(), LocalDate.now())) {
             throw new InvalidReservaDateException("La fecha de la reserva no coincide con la fecha de hoy.");
         }
 

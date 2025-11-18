@@ -7,14 +7,14 @@ import com.project.deporturnos.entity.dto.ReservaResponseDTO;
 import com.project.deporturnos.service.IReservaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.List;
-
 
 @RestController
 @CrossOrigin
@@ -27,8 +27,13 @@ public class ReservaController {
     // Endpoint para obtener todas las reservas
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping
-    public ResponseEntity<List<ReservaResponseDTO>> getAll() {
-        return ResponseEntity.ok(reservaService.getAll());
+    public ResponseEntity<Page<ReservaResponseDTO>> getAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "id") String sortBy) {
+
+        Page<ReservaResponseDTO> dataPage = reservaService.getPaginatedData(page, size, sortBy);
+        return ResponseEntity.ok(dataPage);
     }
 
     // Endpoint para obtener una única reserva por su ID
@@ -48,7 +53,8 @@ public class ReservaController {
     // Endpoint para actualizar una reserva
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<ReservaResponseDTO> update(@PathVariable("id") Long id, @Valid @RequestBody ReservaRequestUpdateDTO reservaRequestUpdateDTO) {
+    public ResponseEntity<ReservaResponseDTO> update(@PathVariable("id") Long id,
+            @Valid @RequestBody ReservaRequestUpdateDTO reservaRequestUpdateDTO) {
         return ResponseEntity.ok(reservaService.update(id, reservaRequestUpdateDTO));
     }
 
@@ -63,17 +69,19 @@ public class ReservaController {
     // Endpoint para mostrar reservas filtradas por fechaDesde || fechaHasta
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/filtrar")
-    public ResponseEntity<List<ReservaResponseDTO>> getReservasByFecha(
+    public ResponseEntity<Page<ReservaResponseDTO>> getReservasByFecha(
             @RequestParam(value = "fechaDesde", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaDesde,
-            @RequestParam(value = "fechaHasta", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaHasta) {
+            @RequestParam(value = "fechaHasta", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaHasta,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "fecha") String sortBy) {
 
-        List<ReservaResponseDTO> reservasFiltradas;
-
-        if (fechaDesde == null && fechaHasta == null) {
-            reservasFiltradas = reservaService.getAll();
-        } else {
-            reservasFiltradas = reservaService.getReservasEntreFechas(fechaDesde, fechaHasta);
-        }
+        Page<ReservaResponseDTO> reservasFiltradas = reservaService.getReservasEntreFechas(
+                fechaDesde,
+                fechaHasta,
+                page,
+                size,
+                sortBy);
 
         return ResponseEntity.ok(reservasFiltradas);
     }
@@ -85,8 +93,6 @@ public class ReservaController {
         reservaService.empezarReserva(id);
         return ResponseEntity.ok("Reserva iniciada exitosamente.");
     }
-
-
 
     // Endpoints para ROLE_CLIENTE o ROLE_ADMIN
 
