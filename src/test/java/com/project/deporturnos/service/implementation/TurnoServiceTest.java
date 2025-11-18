@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.deporturnos.entity.domain.Cancha;
 import com.project.deporturnos.entity.domain.Turno;
 import com.project.deporturnos.entity.domain.TurnoState;
+import com.project.deporturnos.entity.dto.CanchaSimpleDTO;
 import com.project.deporturnos.entity.dto.TurnoRequestDTO;
 import com.project.deporturnos.entity.dto.TurnoRequestUpdateDTO;
 import com.project.deporturnos.entity.dto.TurnoResponseDTO;
@@ -75,7 +76,7 @@ class TurnoServiceTest {
         turnoResponseDTO.setHoraInicio(turnoRequestDTO.getHoraInicio());
         turnoResponseDTO.setHoraFin(turnoRequestDTO.getHoraFin());
         turnoResponseDTO.setEstado(turnoRequestDTO.getEstado());
-        turnoResponseDTO.setCancha(cancha);
+        turnoResponseDTO.setCancha(new CanchaSimpleDTO());
 
         when(canchaRepository.findById(1L)).thenReturn(Optional.of(cancha));
         when(turnoRepository.save(any(Turno.class))).thenReturn(turno);

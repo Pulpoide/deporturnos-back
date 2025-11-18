@@ -5,6 +5,7 @@ import com.project.deporturnos.entity.domain.*;
 import com.project.deporturnos.entity.dto.LockUnlockResponseDTO;
 import com.project.deporturnos.entity.dto.UsuarioRequestUpdateDTO;
 import com.project.deporturnos.entity.dto.UsuarioResponseDTO;
+import com.project.deporturnos.entity.dto.UsuarioSimpleDTO;
 import com.project.deporturnos.exception.BusinessRuleException;
 import com.project.deporturnos.exception.InvalidEmailException;
 import com.project.deporturnos.exception.ResourceNotFoundException;
@@ -15,6 +16,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.*;
@@ -39,10 +45,9 @@ class UsuarioServiceTest {
     @InjectMocks
     private UsuarioService usuarioService;
 
-
     /* Metodo update() */
     @Test
-    void update_Success(){
+    void update_Success() {
 
         Usuario usuario = new Usuario();
         usuario.setId(1L);
@@ -80,7 +85,7 @@ class UsuarioServiceTest {
     }
 
     @Test
-    void update_UserNotFound(){
+    void update_UserNotFound() {
 
         when(usuarioRepository.findById(1L)).thenReturn(Optional.empty());
 
@@ -94,7 +99,7 @@ class UsuarioServiceTest {
     }
 
     @Test
-    void update_InvalidEmail(){
+    void update_InvalidEmail() {
         Usuario usuario = new Usuario();
         usuario.setId(1L);
         usuario.setNombre("Juan Test");
@@ -118,10 +123,10 @@ class UsuarioServiceTest {
         usuario.setEmail("juantest@gmail.com");
 
         UsuarioRequestUpdateDTO userRequestUpdateDTO = new UsuarioRequestUpdateDTO();
-        userRequestUpdateDTO.setEmail("existinguser@email.com");  // Email ya usado por otro usuario
+        userRequestUpdateDTO.setEmail("existinguser@email.com"); // Email ya usado por otro usuario
 
         Usuario existingUser = new Usuario();
-        existingUser.setId(2L);  // Un usuario diferente con el mismo email
+        existingUser.setId(2L); // Un usuario diferente con el mismo email
 
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
         when(usuarioRepository.findByEmail("existinguser@email.com")).thenReturn(Optional.of(existingUser));
@@ -134,42 +139,57 @@ class UsuarioServiceTest {
 
     /* Metodo getAll() */
     @Test
-    void getAll_Success(){
+    void getPaginatedData_Success() {
         Usuario usuario1 = new Usuario(1L, "Juan", "juanTest@email.com", "password123", "3512797689", Rol.CLIENTE, true);
         Usuario usuario2 = new Usuario(2L, "Sofia", "sofiaTest@email.com", "password123", "3512797686", Rol.ADMIN, true);
 
-        List<Usuario> usuarios = Arrays.asList(usuario1, usuario2);
+        List<Usuario> usuariosList = Arrays.asList(usuario1, usuario2);
 
-        when(usuarioRepository.findAllByDeletedFalse()).thenReturn(usuarios);
+        Pageable pageable = PageRequest.of(0, 20, Sort.by("id"));
+        Page<Usuario> usuariosPage = new PageImpl<>(usuariosList, pageable, usuariosList.size());
 
-        // Configuramos el comportamiento del mapper para convertir los usuarios en DTOs
-        when(mapper.convertValue(usuario1, UsuarioResponseDTO.class)).thenReturn(new UsuarioResponseDTO(1L, "Juan", "juanTest@email.com", null));
-        when(mapper.convertValue(usuario2, UsuarioResponseDTO.class)).thenReturn(new UsuarioResponseDTO(2L, "Sofia", "sofiaTest@email.com", null));
+        UsuarioSimpleDTO usuarioSimpleDTO1 = new UsuarioSimpleDTO(1L, "Juan", "juanTest@email.com", "3512797689", Rol.CLIENTE, true, false);
+        UsuarioSimpleDTO usuarioSimpleDTO2 = new UsuarioSimpleDTO(2L, "Sofia", "sofiaTest@email.com", "3512797686", Rol.CLIENTE, true, false);
 
-        List<UsuarioResponseDTO> result = usuarioService.getAll();
 
-        assertEquals(2, result.size());
+        when(usuarioRepository.findAllByDeletedFalse(pageable)).thenReturn(usuariosPage);
 
-        assertEquals("Juan", result.get(0).getNombre());
-        assertEquals("Sofia", result.get(1).getNombre());
+        when(mapper.convertValue(usuario1, UsuarioSimpleDTO.class)).thenReturn(usuarioSimpleDTO1);
+        when(mapper.convertValue(usuario2, UsuarioSimpleDTO.class)).thenReturn(usuarioSimpleDTO2);
 
-        verify(usuarioRepository).findAllByDeletedFalse();
-        verify(mapper).convertValue(usuario1, UsuarioResponseDTO.class);
-        verify(mapper).convertValue(usuario2, UsuarioResponseDTO.class);
+
+        Page<UsuarioSimpleDTO> resultPage = usuarioService.getPaginatedData(pageable);
+
+        assertNotNull(resultPage);
+
+        List<UsuarioSimpleDTO> resultList = resultPage.getContent();
+        assertEquals(2, resultList.size());
+        assertEquals("Juan", resultList.get(0).getNombre());
+        assertEquals("Sofia", resultList.get(1).getNombre());
+
+        verify(usuarioRepository).findAllByDeletedFalse(pageable);
+        verify(mapper).convertValue(usuario1, UsuarioSimpleDTO.class);
+        verify(mapper).convertValue(usuario2, UsuarioSimpleDTO.class);
     }
 
     @Test
-    void getAll_UserNotFound(){
-        when(usuarioRepository.findAllByDeletedFalse()).thenReturn(Collections.emptyList());
+void getPaginatedData_UserNotFound(){
+    Pageable pageable = PageRequest.of(0, 20, Sort.by("id"));
+    
+    Page<Usuario> emptyPage = Page.empty(pageable); 
 
-        assertThrows(ResourceNotFoundException.class, () -> usuarioService.getAll());
+    when(usuarioRepository.findAllByDeletedFalse(pageable)).thenReturn(emptyPage);
 
-        verify(usuarioRepository).findAllByDeletedFalse();
-    }
+    assertThrows(ResourceNotFoundException.class, () -> usuarioService.getPaginatedData(pageable));
+
+    verify(usuarioRepository).findAllByDeletedFalse(pageable);
+    
+    verify(mapper, never()).convertValue(any(Usuario.class), eq(UsuarioSimpleDTO.class));
+}
 
     /* Metodo delete() */
     @Test
-    void delete_Success(){
+    void delete_Success() {
         Turno turno = new Turno();
         Reserva reserva = new Reserva();
         reserva.setDeleted(false);
@@ -196,7 +216,7 @@ class UsuarioServiceTest {
     }
 
     @Test
-    void delete_UserNotFound(){
+    void delete_UserNotFound() {
         when(usuarioRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> usuarioService.delete(1L));
@@ -207,14 +227,15 @@ class UsuarioServiceTest {
 
     /* Metodo changeRole() */
     @Test
-    void changeRole_Success(){
+    void changeRole_Success() {
         Usuario usuario = new Usuario();
         usuario.setId(2L);
         usuario.setRol(Rol.CLIENTE);
 
         when(usuarioRepository.findById(2L)).thenReturn(Optional.of(usuario));
         when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuario);
-        when(mapper.convertValue(usuario, UsuarioResponseDTO.class)).thenReturn(new UsuarioResponseDTO(2L, "Juan Updated", "juanUpdated@email.com", "encodedPassword", null, Rol.ADMIN, true, false));
+        when(mapper.convertValue(usuario, UsuarioResponseDTO.class)).thenReturn(new UsuarioResponseDTO(2L,
+                "Juan Updated", "juanUpdated@email.com", "encodedPassword", null, Rol.ADMIN, true, false));
 
         UsuarioResponseDTO usuarioResponseDTO = usuarioService.changeRole(2L);
 
@@ -224,23 +245,25 @@ class UsuarioServiceTest {
     }
 
     @Test
-    void changeRole_UserNotFound(){
+    void changeRole_UserNotFound() {
         when(usuarioRepository.findById(3L)).thenReturn(Optional.empty());
 
-        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> usuarioService.changeRole(3L));
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> usuarioService.changeRole(3L));
 
         assertEquals("Usuario no encontrado.", exception.getMessage());
         verify(usuarioRepository).findById(3L);
     }
 
     @Test
-    void changeRole_AdminSupreme(){
-        Usuario adminSupremo  = new Usuario();
+    void changeRole_AdminSupreme() {
+        Usuario adminSupremo = new Usuario();
         adminSupremo.setId(1L); // El admin supremo tiene id=1
 
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(adminSupremo));
 
-        BusinessRuleException exception = assertThrows(BusinessRuleException.class, () -> usuarioService.changeRole(1L));
+        BusinessRuleException exception = assertThrows(BusinessRuleException.class,
+                () -> usuarioService.changeRole(1L));
 
         assertEquals("No es posible cambiar el rol al administrador supremo.", exception.getMessage());
         verify(usuarioRepository).findById(1L);
@@ -248,7 +271,7 @@ class UsuarioServiceTest {
 
     /* Metodo lockUnlock() */
     @Test
-    void lockUnlock_Success(){
+    void lockUnlock_Success() {
         // Usuario de prueba:
         Usuario usuario = new Usuario();
         usuario.setId(2L);
@@ -270,7 +293,8 @@ class UsuarioServiceTest {
         when(usuarioRepository.save(usuario)).thenReturn(usuarioSaved);
 
         // Simulamos el mapper
-        when(mapper.convertValue(any(Usuario.class), eq(LockUnlockResponseDTO.class))).thenReturn(new LockUnlockResponseDTO(2L, "juanTest@email.com", false));
+        when(mapper.convertValue(any(Usuario.class), eq(LockUnlockResponseDTO.class)))
+                .thenReturn(new LockUnlockResponseDTO(2L, "juanTest@email.com", false));
 
         // Ejecutamos el metodo
         LockUnlockResponseDTO lockUnlockResponseDTO = usuarioService.lockUnlock(2L);
@@ -287,7 +311,7 @@ class UsuarioServiceTest {
     }
 
     @Test
-    void lockUnlock_UserNotFound(){
+    void lockUnlock_UserNotFound() {
         when(usuarioRepository.findById(3L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> usuarioService.lockUnlock(3L));
@@ -296,19 +320,19 @@ class UsuarioServiceTest {
     }
 
     @Test
-    void lockUnlock_AdminSupreme(){
+    void lockUnlock_AdminSupreme() {
         Usuario adminSupremo = new Usuario();
         adminSupremo.setId(1L);
 
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(adminSupremo));
 
-        BusinessRuleException exception = assertThrows(BusinessRuleException.class, () -> usuarioService.lockUnlock(1L));
+        BusinessRuleException exception = assertThrows(BusinessRuleException.class,
+                () -> usuarioService.lockUnlock(1L));
 
         assertEquals("No es posible bloquear al administrador supremo.", exception.getMessage());
 
         verify(usuarioRepository).findById(1L);
         verify(usuarioRepository, never()).save(any(Usuario.class));
     }
-
 
 }

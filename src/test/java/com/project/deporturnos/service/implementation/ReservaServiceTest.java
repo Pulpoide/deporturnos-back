@@ -5,7 +5,8 @@ import com.project.deporturnos.entity.domain.*;
 import com.project.deporturnos.entity.dto.ReservaRequestDTO;
 import com.project.deporturnos.entity.dto.ReservaRequestUpdateDTO;
 import com.project.deporturnos.entity.dto.ReservaResponseDTO;
-import com.project.deporturnos.entity.dto.UsuarioResponseDTO;
+import com.project.deporturnos.entity.dto.TurnoResponseDTO;
+import com.project.deporturnos.entity.dto.UsuarioSimpleDTO;
 import com.project.deporturnos.exception.ReservaAlreadyCancelledException;
 import com.project.deporturnos.exception.ResourceNotFoundException;
 import com.project.deporturnos.exception.TurnoAlreadyReservedException;
@@ -18,6 +19,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,7 +32,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -81,8 +86,9 @@ class ReservaServiceTest {
         reservaResponseDTO.setId(1L);
         reservaResponseDTO.setFecha(LocalDate.now());
         reservaResponseDTO.setEstado(ReservaState.CONFIRMADA);
-        reservaResponseDTO.setUsuario(new UsuarioResponseDTO(1L, "John Test", "john@email.com", "password123"));
-        reservaResponseDTO.setTurno(turno);
+        reservaResponseDTO.setUsuario(
+                new UsuarioSimpleDTO(1L, "John Test", "john@email.com", "3512768522", Rol.CLIENTE, true, false));
+        reservaResponseDTO.setTurno(new TurnoResponseDTO());
 
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
         when(turnoRepository.findById(1L)).thenReturn(Optional.of(turno));
@@ -168,7 +174,14 @@ class ReservaServiceTest {
         reserva2.setFecha(LocalDate.now());
         reserva2.setEstado(ReservaState.CONFIRMADA);
 
-        List<Reserva> reservas = Arrays.asList(reserva1, reserva2);
+        List<Reserva> reservasList = Arrays.asList(reserva1, reserva2);
+
+        int page = 0;
+        int size = 10;
+        String sortBy = "id";
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
+
+        Page<Reserva> reservasPage = new PageImpl<>(reservasList, pageable, reservasList.size());
 
         ReservaResponseDTO reservaResponseDTO1 = new ReservaResponseDTO();
         reservaResponseDTO1.setId(1L);
@@ -180,31 +193,43 @@ class ReservaServiceTest {
         reservaResponseDTO2.setFecha(LocalDate.now());
         reservaResponseDTO2.setEstado(ReservaState.CONFIRMADA);
 
-        when(reservaRepository.findAllByDeletedFalse()).thenReturn(reservas);
+        when(reservaRepository.findAllByDeletedFalse(pageable)).thenReturn(reservasPage);
         when(mapper.convertValue(reserva1, ReservaResponseDTO.class)).thenReturn(reservaResponseDTO1);
         when(mapper.convertValue(reserva2, ReservaResponseDTO.class)).thenReturn(reservaResponseDTO2);
 
-        List<ReservaResponseDTO> result = reservaService.getAll();
+        Page<ReservaResponseDTO> resultPage = reservaService.getPaginatedData(page, size, sortBy);
 
-        assertNotNull(result);
-        assertEquals(2, result.size());
-        assertEquals(1L, result.get(0).getId());
-        assertEquals(2L, result.get(1).getId());
+        assertNotNull(resultPage);
+        assertEquals(2, resultPage.getTotalElements());
+        assertEquals(1, resultPage.getTotalPages());
 
-        verify(reservaRepository).findAllByDeletedFalse();
+        List<ReservaResponseDTO> resultList = resultPage.getContent();
+        assertEquals(2, resultList.size());
+        assertEquals(1L, resultList.get(0).getId());
+        assertEquals(2L, resultList.get(1).getId());
+
+        verify(reservaRepository).findAllByDeletedFalse(pageable);
         verify(mapper).convertValue(reserva1, ReservaResponseDTO.class);
         verify(mapper).convertValue(reserva2, ReservaResponseDTO.class);
     }
 
     @Test
     void getAll_NotFound() {
-        when(reservaRepository.findAllByDeletedFalse()).thenReturn(Collections.emptyList());
+        int page = 0;
+        int size = 10;
+        String sortBy = "id";
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
 
-        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> reservaService.getAll());
+        Page<Reserva> emptyPage = Page.empty(pageable);
+
+        when(reservaRepository.findAllByDeletedFalse(pageable)).thenReturn(emptyPage);
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> reservaService.getPaginatedData(page, size, sortBy));
 
         assertEquals("No se encontraron reservas para listar.", exception.getMessage());
 
-        verify(reservaRepository).findAllByDeletedFalse();
+        verify(reservaRepository).findAllByDeletedFalse(pageable);
         verify(mapper, never()).convertValue(any(Reserva.class), eq(ReservaResponseDTO.class));
     }
 
@@ -373,7 +398,8 @@ class ReservaServiceTest {
         when(turnoRepository.findById(request.getTurnoId())).thenReturn(Optional.of(turno));
         when(mapper.convertValue(request, Reserva.class)).thenReturn(new Reserva());
         when(reservaRepository.save(any(Reserva.class))).thenReturn(new Reserva());
-        when(mapper.convertValue(any(Reserva.class), eq(ReservaResponseDTO.class))).thenReturn(new ReservaResponseDTO());
+        when(mapper.convertValue(any(Reserva.class), eq(ReservaResponseDTO.class)))
+                .thenReturn(new ReservaResponseDTO());
 
         SecurityContext securityContext = mock(SecurityContext.class);
         when(securityContext.getAuthentication()).thenReturn(mock(Authentication.class));
@@ -482,7 +508,8 @@ class ReservaServiceTest {
         reserva.setUsuario(currentUser);
 
         when(reservaRepository.findById(reservaId)).thenReturn(Optional.of(reserva));
-        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(currentUser, null));
+        SecurityContextHolder.getContext()
+                .setAuthentication(new UsernamePasswordAuthenticationToken(currentUser, null));
 
         assertThrows(ReservaAlreadyCancelledException.class, () -> reservaService.cancel(reservaId));
         verify(reservaRepository, never()).save(any(Reserva.class));
@@ -524,7 +551,8 @@ class ReservaServiceTest {
         currentUser.setRol(Rol.CLIENTE);
 
         when(reservaRepository.findById(reservaId)).thenReturn(Optional.empty());
-        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(currentUser, null));
+        SecurityContextHolder.getContext()
+                .setAuthentication(new UsernamePasswordAuthenticationToken(currentUser, null));
 
         assertThrows(ResourceNotFoundException.class, () -> reservaService.cancel(reservaId));
         verify(reservaRepository, never()).save(any(Reserva.class));
