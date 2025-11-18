@@ -8,6 +8,9 @@ import com.project.deporturnos.repository.IReservaRepository;
 import com.project.deporturnos.repository.IUsuarioRepository;
 import com.project.deporturnos.service.IUsuarioService;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,21 +32,21 @@ import java.util.regex.Pattern;
 public class UsuarioService implements IUsuarioService, UserDetailsService {
 
     private final IUsuarioRepository usuarioRepository;
-    private final IReservaRepository  reservaRepository;
+    private final IReservaRepository reservaRepository;
     private final PasswordEncoder passwordEncoder;
     private final ObjectMapper mapper;
     private static final Long SUPER_ADMIN_ID = 1L;
 
     @Override
-    public List<UsuarioResponseDTO> getAll(){
+    public List<UsuarioResponseDTO> getAll() {
         List<Usuario> usuarios = usuarioRepository.findAllByDeletedFalse();
 
-        if(usuarios.isEmpty()){
+        if (usuarios.isEmpty()) {
             throw new ResourceNotFoundException("No se encontraron usuarios para listar.");
         }
 
         List<UsuarioResponseDTO> usuarioResponseDTOS = new ArrayList<>();
-        for(Usuario usuario : usuarios){
+        for (Usuario usuario : usuarios) {
             usuarioResponseDTOS.add(mapper.convertValue(usuario, UsuarioResponseDTO.class));
         }
 
@@ -51,7 +54,7 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
     }
 
     @Override
-    public void delete(Long id){
+    public void delete(Long id) {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado."));
 
@@ -74,25 +77,24 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
         usuarioRepository.save(usuario);
     }
 
-
     @Override
-    public UsuarioResponseDTO update(Long id, UsuarioRequestUpdateDTO usuarioRequestUpdateDTO){
+    public UsuarioResponseDTO update(Long id, UsuarioRequestUpdateDTO usuarioRequestUpdateDTO) {
         return getUsuarioResponseDTO(id, usuarioRequestUpdateDTO);
     }
 
     private UsuarioResponseDTO getUsuarioResponseDTO(Long id, UsuarioRequestUpdateDTO usuarioRequestUpdateDTO) {
         Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
-        if(usuarioOptional.isEmpty()){
+        if (usuarioOptional.isEmpty()) {
             throw new ResourceNotFoundException("Usuario no encontrado.");
         }
 
         Usuario usuario = usuarioOptional.get();
 
-        if(usuarioRequestUpdateDTO.getNombre() != null){
+        if (usuarioRequestUpdateDTO.getNombre() != null) {
             usuario.setNombre(usuarioRequestUpdateDTO.getNombre());
         }
 
-        if(usuarioRequestUpdateDTO.getEmail() != null){
+        if (usuarioRequestUpdateDTO.getEmail() != null) {
 
             // Validación de email
             String regex = "^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,}$";
@@ -103,14 +105,14 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
             }
 
             Optional<Usuario> usuarioOptional2 = usuarioRepository.findByEmail(usuarioRequestUpdateDTO.getEmail());
-            if(usuarioOptional2.isPresent()){
+            if (usuarioOptional2.isPresent()) {
                 throw new UserAlreadyExistsException("Ya existe un usuario con ese email.");
             }
 
             usuario.setEmail(usuarioRequestUpdateDTO.getEmail());
         }
 
-        if(usuarioRequestUpdateDTO.getPassword() != null){
+        if (usuarioRequestUpdateDTO.getPassword() != null) {
 
             // Validación de password
             String regexPass = "^(?=\\w*\\d)(?=\\w*[a-z])\\S{8,16}$";
@@ -123,7 +125,7 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
             usuario.setPassword(passwordEncoder.encode(usuarioRequestUpdateDTO.getPassword()));
         }
 
-        if(usuarioRequestUpdateDTO.getTelefono() != null){
+        if (usuarioRequestUpdateDTO.getTelefono() != null) {
             usuario.setTelefono(usuarioRequestUpdateDTO.getTelefono());
         }
 
@@ -134,7 +136,6 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
         Usuario usuarioSaved = usuarioRepository.save(usuario);
         return mapper.convertValue(usuarioSaved, UsuarioResponseDTO.class);
     }
-
 
     @Override
     public UsuarioResponseDTO changeRole(Long id) {
@@ -171,35 +172,47 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
     }
 
     @Override
-    public List<Reserva> findReservationsByUserId(Long id, boolean includeCompleted) {
+    public Page<ReservaResponseDTO> findReservationsByUserIdPaginated(Long id, boolean includeCompleted,
+            Pageable pageable) {
         // Get current user from SecurityContext
         Usuario currentUser = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if(currentUser.getRol().equals(Rol.CLIENTE)) {
+        if (currentUser.getRol().equals(Rol.CLIENTE)) {
             if (!Objects.equals(id, currentUser.getId())) {
                 throw new InsufficientAuthenticationException("No autorizado.");
             }
         }
-        if(includeCompleted){
-            return reservaRepository.findByUsuarioIdAndDeletedFalse(id);
-        }else{
-            return reservaRepository.findByUsuarioIdAndEstadoNotAndDeletedFalse(id, ReservaState.COMPLETADA);
+
+        Page<Reserva> reservasPage;
+        if (includeCompleted) {
+            reservasPage = reservaRepository.findByUsuarioIdAndDeletedFalse(id, pageable);
+        } else {
+            reservasPage = reservaRepository.findByUsuarioIdAndEstadoNotAndDeletedFalse(id, ReservaState.COMPLETADA,
+                    pageable);
         }
+        return reservasPage.map(this::mapToReservaResponseDTO);
     }
+
+    private ReservaResponseDTO mapToReservaResponseDTO(Reserva reserva) {
+    if (reserva == null) {
+        return null;
+    }
+    return mapper.convertValue(reserva, ReservaResponseDTO.class);
+}
 
     @Override
     public ProfileResUpdateDTO updateProfile(Long id, ProfileReqUpdateDTO profileReqUpdateDTO) {
 
-       Usuario currentUser = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if(currentUser.getRol().equals(Rol.CLIENTE)) {
+        Usuario currentUser = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (currentUser.getRol().equals(Rol.CLIENTE)) {
             if (!id.equals(currentUser.getId())) {
                 throw new InsufficientAuthenticationException("No autorizado.");
             }
         }
 
-        if(profileReqUpdateDTO.getNombre() != null){
+        if (profileReqUpdateDTO.getNombre() != null) {
             currentUser.setNombre(profileReqUpdateDTO.getNombre());
         }
-        if(profileReqUpdateDTO.getTelefono() != null){
+        if (profileReqUpdateDTO.getTelefono() != null) {
             currentUser.setTelefono(profileReqUpdateDTO.getTelefono());
         }
 
@@ -214,19 +227,20 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
     public ResponseEntity<?> changePassword(Long id, PasswordChangeRequestDTO passwordChangeRequestDTO) {
         Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
 
-        if(usuarioOptional.isEmpty()){
+        if (usuarioOptional.isEmpty()) {
             throw new ResourceNotFoundException("Usuario no encontrado.");
         }
 
         Usuario usuario = usuarioOptional.get();
 
         // Verificación de la contraseña actual
-        if(!passwordEncoder.matches(passwordChangeRequestDTO.getOldPassword(), usuario.getPassword())){
+        if (!passwordEncoder.matches(passwordChangeRequestDTO.getOldPassword(), usuario.getPassword())) {
             throw new InvalidPasswordException("Contraseña actual incorrecta.");
         }
 
         // Validación y actualización de la nueva contraseña
-        validateAndUpdatePassword(mapper.convertValue(passwordChangeRequestDTO, PasswordResetRequestDTO.class), usuario);
+        validateAndUpdatePassword(mapper.convertValue(passwordChangeRequestDTO, PasswordResetRequestDTO.class),
+                usuario);
 
         return ResponseEntity.ok(new ApiResponse(true, "Contraseña cambiada exitosamente."));
     }
@@ -242,7 +256,8 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
         Matcher matcherPass = patternPass.matcher(passwordResetRequestDTO.getNewPassword());
 
         if (!matcherPass.matches()) {
-            throw new InvalidPasswordException("La nueva contraseña no cumple con los requisitos de seguridad: Minimo ocho caracteres, al menos un número y una letra.");
+            throw new InvalidPasswordException(
+                    "La nueva contraseña no cumple con los requisitos de seguridad: Minimo ocho caracteres, al menos un número y una letra.");
         }
 
         usuario.setPassword(passwordEncoder.encode(passwordResetRequestDTO.getNewPassword()));
@@ -253,7 +268,6 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
     public Optional<Usuario> findByEmail(String email) {
         return usuarioRepository.findByEmail(email);
     }
-
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -267,9 +281,9 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
     }
 
     @Override
-    public ResponseEntity<?> resetPassword(Long userId, PasswordResetRequestDTO passwordResetRequestDTO){
+    public ResponseEntity<?> resetPassword(Long userId, PasswordResetRequestDTO passwordResetRequestDTO) {
         Optional<Usuario> usuarioOptional = usuarioRepository.findById(userId);
-        if(usuarioOptional.isEmpty()){
+        if (usuarioOptional.isEmpty()) {
             throw new ResourceNotFoundException("Usuario no encontrado.");
         }
 

@@ -17,9 +17,9 @@ import java.util.List;
 @Repository
 public interface IReservaRepository extends JpaRepository<Reserva, Long>, JpaSpecificationExecutor<Reserva> {
 
-    List<Reserva> findByUsuarioIdAndEstadoNotAndDeletedFalse(Long id, ReservaState state);
+    Page<Reserva> findByUsuarioIdAndEstadoNotAndDeletedFalse(Long id, ReservaState state, Pageable pageable);
 
-    List<Reserva> findByUsuarioIdAndDeletedFalse(Long id);
+    Page<Reserva> findByUsuarioIdAndDeletedFalse(Long id, Pageable pageable);
 
     List<Reserva> findByEstado(ReservaState state);
 
