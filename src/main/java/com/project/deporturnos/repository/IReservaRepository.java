@@ -2,6 +2,9 @@ package com.project.deporturnos.repository;
 
 import com.project.deporturnos.entity.domain.Reserva;
 import com.project.deporturnos.entity.domain.ReservaState;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -21,5 +24,5 @@ public interface IReservaRepository extends JpaRepository<Reserva, Long>, JpaSpe
     List<Reserva> findByEstado(ReservaState state);
 
     @Query("SELECT r FROM Reserva r WHERE r.deleted = false")
-    List<Reserva> findAllByDeletedFalse();
+    Page<Reserva> findAllByDeletedFalse(Pageable pageable);
 }
