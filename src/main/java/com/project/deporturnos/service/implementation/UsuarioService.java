@@ -167,32 +167,56 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
     }
 
     @Override
-    public Page<ReservaResponseDTO> findReservationsByUserIdPaginated(Long id, boolean includeCompleted,
+    public Page<ReservaResponseDTO> findReservations(Long userId, String estado,
             Pageable pageable) {
         // Get current user from SecurityContext
         Usuario currentUser = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (currentUser.getRol().equals(Rol.CLIENTE)) {
-            if (!Objects.equals(id, currentUser.getId())) {
+            if (!Objects.equals(userId, currentUser.getId())) {
                 throw new InsufficientAuthenticationException("No autorizado.");
             }
         }
 
+        List<ReservaState> filtros;
+
+        switch (estado.toUpperCase()) {
+            case "FUTURAS":
+                filtros = List.of(ReservaState.CONFIRMADA, ReservaState.EN_PROCESO);
+                break;
+
+            case "COMPLETADAS":
+                filtros = List.of(ReservaState.COMPLETADA);
+                break;
+
+            case "CANCELADAS":
+                filtros = List.of(ReservaState.CANCELADA);
+                break;
+
+            case "TODAS":
+            default:
+                filtros = null;
+                break;
+        }
+
         Page<Reserva> reservasPage;
-        if (includeCompleted) {
-            reservasPage = reservaRepository.findByUsuarioIdAndDeletedFalse(id, pageable);
+
+        if (filtros == null) {
+            reservasPage = reservaRepository.findByUsuarioIdAndDeletedFalse(userId, pageable);
         } else {
-            reservasPage = reservaRepository.findByUsuarioIdAndEstadoNotAndDeletedFalse(id, ReservaState.COMPLETADA,
+            reservasPage = reservaRepository.findByUsuarioIdAndEstadoInAndDeletedFalse(
+                    userId,
+                    filtros,
                     pageable);
         }
         return reservasPage.map(this::mapToReservaResponseDTO);
     }
 
     private ReservaResponseDTO mapToReservaResponseDTO(Reserva reserva) {
-    if (reserva == null) {
-        return null;
+        if (reserva == null) {
+            return null;
+        }
+        return mapper.convertValue(reserva, ReservaResponseDTO.class);
     }
-    return mapper.convertValue(reserva, ReservaResponseDTO.class);
-}
 
     @Override
     public ProfileResUpdateDTO updateProfile(Long id, ProfileReqUpdateDTO profileReqUpdateDTO) {
