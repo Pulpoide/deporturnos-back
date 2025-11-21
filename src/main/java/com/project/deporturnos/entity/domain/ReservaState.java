@@ -4,6 +4,5 @@ public enum ReservaState {
     CONFIRMADA,
     EN_PROCESO,
     COMPLETADA,
-    MODIFICADA,
     CANCELADA
 }

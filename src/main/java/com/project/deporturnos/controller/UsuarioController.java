@@ -80,9 +80,9 @@ public class UsuarioController {
     @PreAuthorize("hasRole('ROLE_CLIENTE') or hasRole('ROLE_ADMIN')")
     @GetMapping("/{id}/reservas")
     public ResponseEntity<Page<ReservaResponseDTO>> getUserReservations(@PathVariable("id") Long id,
-            @RequestParam(value = "includeCompleted", required = false, defaultValue = "false") boolean includeCompleted,
+            @RequestParam(defaultValue = "FUTURAS") String estado,
             Pageable pageable) {
-        return ResponseEntity.ok(usuarioService.findReservationsByUserIdPaginated(id, includeCompleted, pageable));
+        return ResponseEntity.ok(usuarioService.findReservations(id, estado, pageable));
     }
 
     // Cambiar Contraseña

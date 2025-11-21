@@ -22,7 +22,7 @@ public interface IUsuarioService {
 
     LockUnlockResponseDTO lockUnlock(Long id);
 
-    Page<ReservaResponseDTO> findReservationsByUserIdPaginated(Long id, boolean includeCompleted, Pageable pageable);
+    Page<ReservaResponseDTO> findReservations(Long id, String estado, Pageable pageable);
 
     ProfileResUpdateDTO updateProfile(Long id, @Valid ProfileReqUpdateDTO profileReqUpdateDTO);
 
