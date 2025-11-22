@@ -20,7 +20,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -38,8 +37,14 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
     private static final Long SUPER_ADMIN_ID = 1L;
 
     @Override
-    public Page<UsuarioSimpleDTO> getPaginatedData(Pageable pageable) {
-        Page<Usuario> usuariosPage = usuarioRepository.findAllByDeletedFalse(pageable);
+    public Page<UsuarioSimpleDTO> getPaginatedData(Pageable pageable, String search) {
+        Page<Usuario> usuariosPage;
+        
+        if (search != null && !search.isEmpty()) {
+            usuariosPage = usuarioRepository.searchByNombreOrEmail(search, pageable);
+        }else{
+             usuariosPage = usuarioRepository.findAllByDeletedFalse(pageable);
+        }
 
         if (usuariosPage.isEmpty()) {
             throw new ResourceNotFoundException("No se encontraron usuarios para listar.");
@@ -50,6 +55,8 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
 
     @Override
     public void delete(Long id) {
+        Objects.requireNonNull(id, "Id de usuario es obligatorio.");
+
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado."));
 
@@ -252,12 +259,10 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
 
         Usuario usuario = usuarioOptional.get();
 
-        // Verificación de la contraseña actual
         if (!passwordEncoder.matches(passwordChangeRequestDTO.getOldPassword(), usuario.getPassword())) {
             throw new InvalidPasswordException("Contraseña actual incorrecta.");
         }
 
-        // Validación y actualización de la nueva contraseña
         validateAndUpdatePassword(mapper.convertValue(passwordChangeRequestDTO, PasswordResetRequestDTO.class),
                 usuario);
 
@@ -269,7 +274,6 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
             throw new InvalidPasswordException("La nueva contraseña y su confirmación no coinciden.");
         }
 
-        // Validación de los requisitos de la nueva contraseña
         String regexPass = "^(?=\\w*\\d)(?=\\w*[a-z])\\S{8,16}$";
         Pattern patternPass = Pattern.compile(regexPass);
         Matcher matcherPass = patternPass.matcher(passwordResetRequestDTO.getNewPassword());
@@ -307,8 +311,6 @@ public class UsuarioService implements IUsuarioService, UserDetailsService {
         }
 
         Usuario usuario = usuarioOptional.get();
-
-        // Validación y actualización de la nueva contraseña
         validateAndUpdatePassword(passwordResetRequestDTO, usuario);
 
         return ResponseEntity.ok(new ApiResponse(true, "Contraseña restablecida exitosamente."));
