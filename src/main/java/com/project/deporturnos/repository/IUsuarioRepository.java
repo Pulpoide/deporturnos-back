@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -16,6 +17,12 @@ import java.util.Optional;
 @EnableJpaRepositories
 @Repository
 public interface IUsuarioRepository extends JpaRepository<Usuario, Long> {
+    
+    @Query("SELECT u FROM Usuario u " +
+           "WHERE u.deleted = false AND (" +
+           "LOWER(u.nombre) LIKE CONCAT('%', LOWER(:search), '%') " +
+           "OR LOWER(u.email) LIKE CONCAT('%', LOWER(:search), '%'))")
+    Page<Usuario> searchByNombreOrEmail(@Param("search") String search, Pageable pageable);
 
     Optional<Usuario> findOneByEmailAndPassword(String nombre, String password);
 
