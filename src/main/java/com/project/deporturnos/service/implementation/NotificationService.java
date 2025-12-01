@@ -4,6 +4,8 @@ import com.project.deporturnos.entity.domain.Usuario;
 import com.project.deporturnos.service.INotificationService;
 import com.project.deporturnos.utils.QRCodeGenerator;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -17,6 +19,7 @@ public class NotificationService implements INotificationService {
 
     private final EmailService emailService;
 
+    @Async
     public void sendNotificationReservationConfirmed(Usuario user, Long reservaId) {
         String qrData = "http://localhost:5173/validate-reserva/" + reservaId;
 
