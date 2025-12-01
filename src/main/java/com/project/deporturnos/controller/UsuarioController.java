@@ -1,6 +1,5 @@
 package com.project.deporturnos.controller;
 
-import com.project.deporturnos.entity.domain.Reserva;
 import com.project.deporturnos.entity.domain.Usuario;
 import com.project.deporturnos.entity.dto.*;
 import com.project.deporturnos.security.PasswordResetTokenService;
