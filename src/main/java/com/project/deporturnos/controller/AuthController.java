@@ -36,7 +36,7 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<RegistrationResponseDTO> register(@RequestBody RegistrationRequestDTO registrationRequestDTO) {
         RegistrationResponseDTO registrationResponseDTO =  authService.signup(registrationRequestDTO);
-        return ResponseEntity.ok(registrationResponseDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(registrationResponseDTO);
     }
 
     // Endpoint para verificar email de usuario

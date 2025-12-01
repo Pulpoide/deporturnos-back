@@ -1,7 +1,6 @@
 package com.project.deporturnos.configuration;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,11 +14,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @RequiredArgsConstructor
 public class ApplicationConfig {
 
-    @Autowired
-    private UserDetailsService service;
-
-    @Autowired
-    private PasswordEncoder encoder;
+    private final UserDetailsService service;
+    private final PasswordEncoder encoder;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception
