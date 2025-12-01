@@ -13,7 +13,12 @@ import com.project.deporturnos.exception.VerificationEmailException;
 import com.project.deporturnos.repository.IUsuarioRepository;
 import com.project.deporturnos.security.JwtService;
 import jakarta.mail.MessagingException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,11 +27,11 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Random;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
     private final IUsuarioRepository userRepository;
@@ -35,52 +40,56 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
 
+    @Transactional
     public RegistrationResponseDTO signup(RegistrationRequestDTO request) {
-        Optional<Usuario> usuarioOptional = userRepository.findByEmail(request.getEmail());
-        if (usuarioOptional.isPresent()) {
-            throw new UserAlreadyExistsException("El usuario ya existe.");
-        }
-
-        // Validación de email
-        String regex = "^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,}$";
-        java.util.regex.Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(request.getEmail());
-        if (!matcher.matches()) {
+        final Pattern emailPattern = Pattern.compile("^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,}$");
+        if (!emailPattern.matcher(request.getEmail()).matches()) {
             throw new InvalidEmailException("Correo electrónico no válido.");
         }
 
-        // Validación de password
-        String regexPass = "^(?=\\w*\\d)(?=\\w*[a-z])\\S{8,16}$";
-        java.util.regex.Pattern patternPass = Pattern.compile(regexPass);
-        Matcher matcherPass = patternPass.matcher(request.getPassword());
-        if (!matcherPass.matches()) {
+        final Pattern passPattern = Pattern.compile("^(?=\\w*\\d)(?=\\w*[a-z])\\S{8,16}$");
+        if (!passPattern.matcher(request.getPassword()).matches()) {
             throw new InvalidPasswordException("Contraseña no válida.");
         }
 
-        Usuario user = Usuario.builder()
-                .nombre(request.getNombre())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .email(request.getEmail())
-                .telefono(request.getTelefono())
-                .rol(Rol.CLIENTE)
-                .activada(true)
-                .build();
+        try {
+            Usuario user = Usuario.builder()
+                    .nombre(request.getNombre())
+                    .email(request.getEmail())
+                    .telefono(request.getTelefono())
+                    .password(passwordEncoder.encode(request.getPassword()))
+                    .rol(Rol.CLIENTE)
+                    .activada(false)
+                    .verificationCode(generateVerificationCode())
+                    .verificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15))
+                    .build();
 
-        user.setVerificationCode(generateVerificationCode());
-        user.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
-        user.setActivada(false);
-        sendVerificationEmail(user);
+            userRepository.save(user);
 
-        userRepository.save(user);
+            sendVerificationEmailAsync(user);
 
-        String token = jwtService.getToken(user);
-        return RegistrationResponseDTO.builder()
-                .id(user.getId())
-                .nombre(request.getNombre())
-                .email(request.getEmail())
-                .token(token)
-                .telefono(request.getTelefono())
-                .build();
+            String token = jwtService.getToken(user);
+
+            return RegistrationResponseDTO.builder()
+                    .id(user.getId())
+                    .nombre(user.getNombre())
+                    .email(user.getEmail())
+                    .token(token)
+                    .telefono(user.getTelefono())
+                    .build();
+
+        } catch (DataIntegrityViolationException e) {
+            throw new UserAlreadyExistsException("El usuario ya existe.");
+        }
+    }
+
+    @Async
+    public void sendVerificationEmailAsync(Usuario user) {
+        try {
+            sendVerificationEmail(user);
+        } catch (Exception e) {
+            log.error("No se pudo enviar el email de verificación a {}: {}", user.getEmail(), e.getMessage());
+        }
     }
 
     public String generateVerificationCode() {
@@ -90,24 +99,27 @@ public class AuthService {
     }
 
     private void sendVerificationEmail(Usuario user) {
-        String subject = "Account Verification";
+        String subject = "Verificación de cuenta";
         String verificationCode = user.getVerificationCode();
         String body = "<html>"
                 + "<body style=\"font-family: Arial, sans-serif;\">"
                 + "<div style=\"background-color: #f5f5f5; padding: 20px;\">"
                 + "<h2 style=\"color: #333;\">¡Bienvenido a DeporTurnos!</h2>"
-                + "<p style=\"font-size: 16px;\">Ingrese el código de verificación para continuar.</p>"
-                + "<div style=\"background-color: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1);\">"
-                + "<h3 style=\"color: #333;\">Código de verificación:</h3>"
-                + "<p style=\"font-size: 18px; font-weight: bold; color: #007bff;\">" + verificationCode + "</p>"
+                + "<p style=\"font-size: 16px;\">Ingrese el siguiente código de verificación:</p>"
+                + "<div style=\"background-color: #fff; padding: 20px; border-radius: 5px; "
+                + "box-shadow: 0 0 10px rgba(0,0,0,0.1);\">"
+                + "<h3 style=\"color: #333;\">Código:</h3>"
+                + "<p style=\"font-size: 18px; font-weight: bold; color: #007bff;\">"
+                + verificationCode + "</p>"
                 + "</div>"
                 + "</div>"
                 + "</body>"
                 + "</html>";
+
         try {
             emailService.sendEmail(user.getEmail(), subject, body);
         } catch (MessagingException e) {
-            throw new VerificationEmailException("Error al enviar código de verificación.");
+            throw new VerificationEmailException("Error al enviar el código de verificación.");
         }
     }
 
@@ -154,15 +166,13 @@ public class AuthService {
         if (!user.isActivada()) {
             throw new RuntimeException("Cuenta no verificada. Por favor verifique su cuenta.");
         }
-        if(user.isDeleted()){
+        if (user.isDeleted()) {
             throw new RuntimeException("Usuario no encontrado.");
         }
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         input.getEmail(),
-                        input.getPassword()
-                )
-        );
+                        input.getPassword()));
 
         return user;
     }

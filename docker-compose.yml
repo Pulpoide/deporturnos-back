@@ -18,7 +18,8 @@ services:
     env_file:
       - .env.docker
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/deporturnos
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/deporturnos
+      - APP_MAIL_ENABLED=false
     depends_on:
       - db
 
