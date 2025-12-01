@@ -140,25 +140,27 @@ class UsuarioServiceTest {
     /* Metodo getAll() */
     @Test
     void getPaginatedData_Success() {
-        Usuario usuario1 = new Usuario(1L, "Juan", "juanTest@email.com", "password123", "3512797689", Rol.CLIENTE, true);
-        Usuario usuario2 = new Usuario(2L, "Sofia", "sofiaTest@email.com", "password123", "3512797686", Rol.ADMIN, true);
+        Usuario usuario1 = new Usuario(1L, "Juan", "juanTest@email.com", "password123", "3512797689", Rol.CLIENTE,
+                true);
+        Usuario usuario2 = new Usuario(2L, "Sofia", "sofiaTest@email.com", "password123", "3512797686", Rol.ADMIN,
+                true);
 
         List<Usuario> usuariosList = Arrays.asList(usuario1, usuario2);
 
         Pageable pageable = PageRequest.of(0, 20, Sort.by("id"));
         Page<Usuario> usuariosPage = new PageImpl<>(usuariosList, pageable, usuariosList.size());
 
-        UsuarioSimpleDTO usuarioSimpleDTO1 = new UsuarioSimpleDTO(1L, "Juan", "juanTest@email.com", "3512797689", Rol.CLIENTE, true, false);
-        UsuarioSimpleDTO usuarioSimpleDTO2 = new UsuarioSimpleDTO(2L, "Sofia", "sofiaTest@email.com", "3512797686", Rol.CLIENTE, true, false);
-
+        UsuarioSimpleDTO usuarioSimpleDTO1 = new UsuarioSimpleDTO(1L, "Juan", "juanTest@email.com", "3512797689",
+                Rol.CLIENTE, true, false);
+        UsuarioSimpleDTO usuarioSimpleDTO2 = new UsuarioSimpleDTO(2L, "Sofia", "sofiaTest@email.com", "3512797686",
+                Rol.CLIENTE, true, false);
 
         when(usuarioRepository.findAllByDeletedFalse(pageable)).thenReturn(usuariosPage);
 
         when(mapper.convertValue(usuario1, UsuarioSimpleDTO.class)).thenReturn(usuarioSimpleDTO1);
         when(mapper.convertValue(usuario2, UsuarioSimpleDTO.class)).thenReturn(usuarioSimpleDTO2);
 
-
-        Page<UsuarioSimpleDTO> resultPage = usuarioService.getPaginatedData(pageable);
+        Page<UsuarioSimpleDTO> resultPage = usuarioService.getPaginatedData(pageable, "");
 
         assertNotNull(resultPage);
 
@@ -173,19 +175,19 @@ class UsuarioServiceTest {
     }
 
     @Test
-void getPaginatedData_UserNotFound(){
-    Pageable pageable = PageRequest.of(0, 20, Sort.by("id"));
-    
-    Page<Usuario> emptyPage = Page.empty(pageable); 
+    void getPaginatedData_UserNotFound() {
+        Pageable pageable = PageRequest.of(0, 20, Sort.by("id"));
 
-    when(usuarioRepository.findAllByDeletedFalse(pageable)).thenReturn(emptyPage);
+        Page<Usuario> emptyPage = Page.empty(pageable);
 
-    assertThrows(ResourceNotFoundException.class, () -> usuarioService.getPaginatedData(pageable));
+        when(usuarioRepository.findAllByDeletedFalse(pageable)).thenReturn(emptyPage);
 
-    verify(usuarioRepository).findAllByDeletedFalse(pageable);
-    
-    verify(mapper, never()).convertValue(any(Usuario.class), eq(UsuarioSimpleDTO.class));
-}
+        assertThrows(ResourceNotFoundException.class, () -> usuarioService.getPaginatedData(pageable, ""));
+
+        verify(usuarioRepository).findAllByDeletedFalse(pageable);
+
+        verify(mapper, never()).convertValue(any(Usuario.class), eq(UsuarioSimpleDTO.class));
+    }
 
     /* Metodo delete() */
     @Test
