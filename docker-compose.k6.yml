@@ -8,7 +8,7 @@ services:
     entrypoint: >
       sh -c "
         echo '🚀 Ejecutando Stress Test...' &&
-        mkdir -p /reports/stress/json &&
+        mkdir -p /k6/reports/stress/json &&
         k6 run /k6/scripts/stress.js --out json=/k6/reports/stress/json/results.json &&
         echo '✅ JSON Reporte generado en /k6/reports/stress/json/results.json'
       "
@@ -26,27 +26,9 @@ services:
     entrypoint: >
       sh -c "
         echo '🚀 Ejecutando Spike Test...' &&
-        mkdir -p /reports/spike/json &&
+        mkdir -p /k6/reports/spike/json &&
         k6 run /k6/scripts/spike.js --out json=/k6/reports/spike/json/results.json &&
         echo '✅ JSON Reporte generado en /k6/reports/spike/json/results.json'
-      "
-    environment:
-      - BASE_URL=http://app:8080
-    networks:
-      - deporturnos-back_default
-
-  k6-load:
-    image: grafana/k6
-    container_name: k6-load-runner
-    user: root
-    volumes:
-      - ./k6:/k6
-    entrypoint: >
-      sh -c "
-        echo '🚀 Ejecutando Load Test...' &&
-        mkdir -p /reports/load/json &&
-        k6 run /scripts/load.js --out json=/reports/load/json/results.json &&
-        echo '✅ JSON Reporte generado en /reports/load/json/results.json'
       "
     environment:
       - BASE_URL=http://app:8080
