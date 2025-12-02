@@ -14,7 +14,7 @@ public interface IUsuarioService {
 
     UsuarioResponseDTO update(Long id, UsuarioRequestUpdateDTO usuarioRequestUpdateDTO);
 
-    Page<UsuarioSimpleDTO> getPaginatedData(Pageable pageable);
+    Page<UsuarioSimpleDTO> getPaginatedData(Pageable pageable, String search);
 
     void delete(Long id);
 

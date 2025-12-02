@@ -10,6 +10,7 @@ import com.project.deporturnos.repository.IReservaRepository;
 import com.project.deporturnos.repository.ITurnoRepository;
 import com.project.deporturnos.repository.IUsuarioRepository;
 import com.project.deporturnos.repository.ReservaSpecification;
+import com.project.deporturnos.service.INotificationService;
 import com.project.deporturnos.service.IReservaService;
 import lombok.RequiredArgsConstructor;
 
@@ -20,6 +21,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
 import java.time.LocalDate;
@@ -34,7 +36,7 @@ public class ReservaService implements IReservaService {
     private final IUsuarioRepository usuarioRepository;
     private final ITurnoRepository turnoRepository;
     private final ObjectMapper mapper;
-    private final NotificationService notificationService;
+    private final INotificationService notificationService;
 
     @Override
     public ReservaResponseDTO save(ReservaRequestDTO reservaRequestDTO) {
@@ -155,6 +157,7 @@ public class ReservaService implements IReservaService {
     }
 
     @Override
+    @Transactional
     public ReservaResponseDTO saveReservaByUser(ReservaRequestDTO reservaRequestDTO) {
 
         Usuario currentUser = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

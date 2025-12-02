@@ -1,1 +1,1 @@
-export const BASE_URL = __ENV.BASE_URL || 'http://app:8080';
+export const BASE_URL = __ENV.BASE_URL || 'http://localhost:8080';
