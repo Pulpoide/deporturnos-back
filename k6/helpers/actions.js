@@ -49,7 +49,7 @@ function httpPostWithRetry(url, payload, headers = {}, maxAttempts = 3, waitMs =
         }
 
         sleep(waitMs / 1000);
-        waitMs *= 2; 
+        waitMs *= 2;
     }
 
     console.error(`❌ POST failed after ${maxAttempts} attempts: ${url}`);
@@ -98,7 +98,7 @@ export function login(email, password) {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
     });
-    
+
     if (!res || res.status !== 200 || !res.body) {
         // console.warn(`⚠️ Login failed (status: ${res ? res.status : 'no response'}) for ${email}`);
         return null;
@@ -133,7 +133,7 @@ export function login(email, password) {
  */
 export function ensureAuth(email, password, name = "Test User") {
     let auth = login(email, password);
-    
+
     if (auth && auth.token) {
         return auth;
     }
@@ -204,7 +204,7 @@ export function crearReserva(token) {
     fechaInicio.setDate(fechaInicio.getDate() + 1); // tomorrow
     const fechaFin = new Date();
     fechaFin.setDate(fechaFin.getDate() + 30); // next 30 days
-    
+
     const fechaRandom = new Date(
         fechaInicio.getTime() +
         Math.random() * (fechaFin.getTime() - fechaInicio.getTime())
@@ -224,9 +224,9 @@ export function crearReserva(token) {
     }
 
     if (!turnosDisponibles || !Array.isArray(turnosDisponibles) || turnosDisponibles.length === 0) {
-        // console.warn(`⚠️ No available turns for cancha ${canchaId} on ${fechaFormateada}`);
         sleep(0.5);
-        return false;
+        // Return true (success) because "no inventory" is a valid business state, not a system failure
+        return true;
     }
 
     const turnoRandom = turnosDisponibles[Math.floor(Math.random() * turnosDisponibles.length)];
@@ -234,8 +234,8 @@ export function crearReserva(token) {
 
     const urlPostReserva = `${BASE_URL}/api/reservas/byuser`;
     const resReserva = httpPostWithRetry(urlPostReserva, payload, authHeaders(token));
-    
-    const success = check(resReserva, {
+
+    check(resReserva, {
         'reserva created or conflict': (r) => [200, 400, 409].includes(r.status),
     });
 
@@ -265,7 +265,6 @@ export function cancelarReserva(token, userId) {
     }
 
     if (!reservas || reservas.length === 0) {
-        // console.log(`ℹ️ User ${userId} has no reserves.`);
         sleep(0.5);
         return true; // nothing to cancel is technically a success of the flow
     }
