@@ -17,11 +17,15 @@ import java.util.Optional;
 @EnableJpaRepositories
 @Repository
 public interface IUsuarioRepository extends JpaRepository<Usuario, Long> {
-    
-    @Query("SELECT u FROM Usuario u " +
-           "WHERE u.deleted = false AND (" +
-           "LOWER(u.nombre) LIKE CONCAT('%', LOWER(:search), '%') " +
-           "OR LOWER(u.email) LIKE CONCAT('%', LOWER(:search), '%'))")
+
+    @Query("""
+            SELECT u FROM Usuario u
+            WHERE u.deleted = false
+            AND (
+                LOWER(u.nombre) LIKE LOWER(CONCAT('%', :search, '%'))
+                OR LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%'))
+            )
+            """)
     Page<Usuario> searchByNombreOrEmail(@Param("search") String search, Pageable pageable);
 
     Optional<Usuario> findOneByEmailAndPassword(String nombre, String password);

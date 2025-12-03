@@ -31,8 +31,8 @@ public class UsuarioController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping
     public ResponseEntity<Page<UsuarioSimpleDTO>> getAll(
-            @PageableDefault(page = 0, size = 20, sort = "id") Pageable pageable,
-            @RequestParam(required = false) String search) {
+            @RequestParam(name = "search", required = false) String search,
+            @PageableDefault(page = 0, size = 20, sort = "id") Pageable pageable) {
         return ResponseEntity.ok(usuarioService.getPaginatedData(pageable, search));
     }
 
