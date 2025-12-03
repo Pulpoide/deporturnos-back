@@ -2,6 +2,7 @@ package com.project.deporturnos.controller;
 
 import com.project.deporturnos.service.IReportsService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import java.time.LocalDate;
 @CrossOrigin
 @RequestMapping("/api/reportes")
 @RequiredArgsConstructor
+@Tag(name = "Reportes", description = "Operaciones relacionadas con la generación de reportes y estadísticas del sistema.")
 public class ReportsController {
 
     private final IReportsService reportsService;
