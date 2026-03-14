@@ -109,7 +109,7 @@ The JSON reports will be generated in `k6/reports/{test_type}/json/results.json`
 
 ## Author
 
-**Joaquin D. Olivero** Full Stack Developer | Backend Specialist
+**Joaquin D. Olivero** Software Engineer | AI Engineer
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/JoaquinOlivero)
 
