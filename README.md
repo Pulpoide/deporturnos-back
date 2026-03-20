@@ -1,4 +1,4 @@
-﻿# DeporTurnos Backend
+﻿# Deporturnos Backend
 
 ![Java](https://img.shields.io/badge/Java-17-ED8B00?logo=openjdk&logoColor=white) ![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.0-6DB33F?logo=springboot&logoColor=white) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?logo=postgresql&logoColor=white) ![k6](https://img.shields.io/badge/k6-Testing-7D64FF?logo=k6&logoColor=white)
 
@@ -42,7 +42,7 @@ deporturnos
 │   │   │   └── DeporturnosApplication.java
 │   │   ├── resources  
 │   │   │   └── application.properties 
-├── k6/                # Load Testing Scripts
+├── k6/               
 ├── docker-compose.k6.yml
 ├── build.gradle
 └── settings.gradle
